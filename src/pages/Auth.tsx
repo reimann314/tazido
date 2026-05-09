@@ -1,18 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useAction } from "convex/react";
+import { api } from "../../convex/_generated/api";
+import { setToken } from "../lib/auth";
 
 type Role = "student" | "company";
 type Mode = "login" | "signup";
-
-// TODO(convex): Replace these mock handlers with Convex mutations.
-// Example:
-//   const signUp = useMutation(api.auth.signUp);
-//   await signUp({ role, email, password, ...profile });
-async function mockSubmit(payload: Record<string, unknown>) {
-  await new Promise((r) => setTimeout(r, 600));
-  console.log("[mock auth submit]", payload);
-  return { ok: true };
-}
 
 export default function Auth() {
   const location = useLocation();
@@ -25,6 +18,10 @@ export default function Auth() {
   const [role, setRole] = useState<Role>(initialRole);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const signUp = useAction(api.auth.signUp);
+  const signIn = useAction(api.auth.signIn);
 
   useEffect(() => {
     setMode(location.pathname.includes("login") ? "login" : "signup");
@@ -32,11 +29,31 @@ export default function Auth() {
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const data = Object.fromEntries(new FormData(e.currentTarget).entries());
+    const data = Object.fromEntries(new FormData(e.currentTarget).entries()) as Record<string, string>;
     setSubmitting(true);
-    await mockSubmit({ mode, role, ...data });
-    setSubmitting(false);
-    setDone(true);
+    setError(null);
+    try {
+      const result =
+        mode === "signup"
+          ? await signUp({
+              role,
+              email: data.email,
+              password: data.password,
+              name: data.fullName,
+              companyName: data.companyName,
+              university: data.university,
+              website: data.website,
+            })
+          : await signIn({ email: data.email, password: data.password });
+      setToken(result.token);
+      setDone(true);
+      setTimeout(() => navigate("/"), 800);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message.replace(/^\[.*?\]\s*/, "") : "حدث خطأ";
+      setError(msg);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -97,16 +114,18 @@ export default function Auth() {
           {done ? (
             <div className="bg-brand/5 border border-brand/20 rounded-2xl p-6 text-center">
               <div className="text-2xl mb-2">✅</div>
-              <p className="font-medium mb-1">تم الاستلام (نسخة تجريبية)</p>
-              <p className="text-sm text-text-secondary mb-4">
-                البيانات ما تنحفظ بعد — انتظر تفعيل Convex.
+              <p className="font-medium mb-1">
+                {mode === "signup" ? "تم إنشاء الحساب" : "تم تسجيل الدخول"}
               </p>
-              <button onClick={() => setDone(false)} className="btn-primary">
-                نموذج جديد
-              </button>
+              <p className="text-sm text-text-secondary">جاري التحويل...</p>
             </div>
           ) : (
             <form onSubmit={onSubmit} className="space-y-4">
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">
+                  {error}
+                </div>
+              )}
               {mode === "signup" && (
                 <Field
                   name={role === "company" ? "companyName" : "fullName"}

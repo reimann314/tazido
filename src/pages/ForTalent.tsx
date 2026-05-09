@@ -87,7 +87,7 @@ export default function ForTalent() {
             </div>
             <div className="rounded-3xl overflow-hidden h-[400px]">
               <img
-                src="/images/student-workspace.jpg"
+                src="/images/Hero-2.webp"
                 alt="طالب يعمل"
                 className="w-full h-full object-cover"
               />
