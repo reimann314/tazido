@@ -77,17 +77,27 @@ export default function Navbar() {
           ))}
         </div>
 
-        {/* CTA Button */}
-        <Link
-          to="/for-companies"
-          className={`hidden md:inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ${
-            scrolled || !isHome
-              ? "bg-brand text-white hover:bg-brand-dark"
-              : "bg-white/10 text-white border border-white/30 hover:bg-white/20"
-          }`}
-        >
-          سجّل شركتك
-        </Link>
+        {/* CTA Buttons */}
+        <div className="hidden md:flex items-center gap-3">
+          <Link
+            to="/login"
+            className={`text-sm font-medium transition-colors duration-300 ${
+              scrolled || !isHome ? "text-text-primary hover:text-brand" : "text-white/90 hover:text-white"
+            }`}
+          >
+            دخول
+          </Link>
+          <Link
+            to="/signup?role=company"
+            className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ${
+              scrolled || !isHome
+                ? "bg-brand text-white hover:bg-brand-dark"
+                : "bg-white/10 text-white border border-white/30 hover:bg-white/20"
+            }`}
+          >
+            سجّل شركتك
+          </Link>
+        </div>
 
         {/* Mobile menu button */}
         <MobileMenu navLinks={navLinks} />
@@ -129,11 +139,25 @@ function MobileMenu({ navLinks }: { navLinks: { label: string; href: string }[] 
               </Link>
             ))}
             <Link
-              to="/for-companies"
+              to="/signup?role=company"
               onClick={() => setOpen(false)}
               className="btn-primary mt-2"
             >
               سجّل شركتك
+            </Link>
+            <Link
+              to="/signup?role=student"
+              onClick={() => setOpen(false)}
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-medium border border-brand text-brand hover:bg-brand hover:text-white transition-all duration-300"
+            >
+              انضم كطالب
+            </Link>
+            <Link
+              to="/login"
+              onClick={() => setOpen(false)}
+              className="text-sm text-text-secondary hover:text-brand transition-colors text-center mt-1"
+            >
+              لديك حساب؟ تسجيل الدخول
             </Link>
           </div>
         </div>

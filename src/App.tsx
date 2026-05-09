@@ -8,6 +8,7 @@ import HowItWorks from "./pages/HowItWorks";
 import ForCompanies from "./pages/ForCompanies";
 import ForTalent from "./pages/ForTalent";
 import About from "./pages/About";
+import Auth from "./pages/Auth";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -30,6 +31,8 @@ function App() {
             <Route path="/for-companies" element={<ForCompanies />} />
             <Route path="/for-talent" element={<ForTalent />} />
             <Route path="/about" element={<About />} />
+            <Route path="/signup" element={<Auth />} />
+            <Route path="/login" element={<Auth />} />
           </Routes>
         </div>
         <Footer />
