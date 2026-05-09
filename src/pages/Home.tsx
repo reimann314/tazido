@@ -346,59 +346,6 @@ function TwoPaths() {
   );
 }
 
-/* ─── Stats ─── */
-function Stats() {
-  const sectionRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.utils.toArray<HTMLElement>(".stat-card").forEach((card, i) => {
-        gsap.fromTo(
-          card,
-          { scale: 0.9, opacity: 0 },
-          {
-            scale: 1,
-            opacity: 1,
-            duration: 0.6,
-            ease: "power3.out",
-            scrollTrigger: { trigger: card, start: "top 85%" },
-            delay: i * 0.08,
-          }
-        );
-      });
-    }, sectionRef);
-    return () => ctx.revert();
-  }, []);
-
-  const stats = [
-    { value: "١٢٣٤+", label: "طالب مسجّل" },
-    { value: "٥٦", label: "شركة شريكة" },
-    { value: "٩٨%", label: "نسبة التوظيف بعد الإقامة" },
-    { value: "١٢", label: "من أفضل ٥٣٠ مبادرة (مسك)" },
-  ];
-
-  return (
-    <section ref={sectionRef} className="section-padding bg-surface-pure">
-      <div className="container-main">
-        <h2 className="text-h2 text-text-primary text-center mb-16">
-          أرقام تزيد تتكلم
-        </h2>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-          {stats.map((stat, i) => (
-            <div
-              key={i}
-              className="stat-card bg-surface rounded-2xl p-8 text-center border border-border-light"
-            >
-              <div className="text-brand text-4xl lg:text-5xl font-bold mb-3">{stat.value}</div>
-              <div className="text-text-secondary text-sm">{stat.label}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 /* ─── Vision Banner ─── */
 function VisionBanner() {
   const sectionRef = useRef<HTMLDivElement>(null);
