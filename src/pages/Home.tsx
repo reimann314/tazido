@@ -591,7 +591,6 @@ export default function Home() {
       <Ticker />
       <HowItWorks />
       <TwoPaths />
-      <Stats />
       <VisionBanner />
       <AwardSection />
       <FinalCTA />
