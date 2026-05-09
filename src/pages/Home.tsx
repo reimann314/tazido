@@ -160,55 +160,31 @@ function HowItWorks() {
 
   const steps = [
     {
-      num: "01",
-      title: "الشركة تفتح فرصة تدريب",
-      points: [
-        "تسجيل احتياج التدريب وتحديد التخصص الجامعي المطلوب",
-        "تزيد تساعد في صياغة الفرصة وهيكلة البرنامج التدريبي",
-        "تحديد مدة الإقامة والأهداف والمخرجات المتوقعة",
-        "نشر الفرصة على المنصة وربطها بالتخصصات الجامعية المناسبة",
-      ],
-      span: "lg:col-span-7",
+      num: 1,
+      title: "تحديد الاحتياجات",
+      desc: "الشركة تفتح فرصة تدريب وتحدد التخصص الجامعي المطلوب، وتزيد تساعد في هيكلة البرنامج.",
     },
     {
-      num: "02",
-      title: "تزيد تطابق المتدرب",
-      points: [
-        "تصفية الطلاب حسب التخصص والمهارات المطلوبة",
-        "تزيد تنشر الفرصة وتجذب الطلاب المناسبين",
-        "اختيار من ملفات الطلاب المرشحين",
-        "متابعة الأداء بتقارير دورية",
-      ],
-      span: "lg:col-span-5",
+      num: 2,
+      title: "التوافق المثالي",
+      desc: "تزيد تطابق المتدرب المناسب من ملفات الطلاب المرشحين بناءً على احتياج الشركة.",
     },
     {
-      num: "03",
-      title: "الطالب يبدأ الإقامة",
-      points: [
-        "الطالب يعمل معك في شركتك ويعمل على مشاريع حقيقية",
-        "تزيد ترافقك وتزودك بالتقارير الدورية",
-        "إشراف ودعم طوال فترة الإقامة",
-        "اختبار مناسبة الطالب والشركة",
-      ],
-      span: "lg:col-span-5",
+      num: 3,
+      title: "إطلاق برنامج التدريب",
+      desc: "الطالب يبدأ الإقامة ويعمل على مشاريع حقيقية، مع إشراف ودعم تزيد طوال الفترة.",
     },
     {
-      num: "04",
-      title: "الشركة توظّف مباشرة",
-      points: [
-        "تقرير نهائي عن أداء المتدرب وتوصية بالتوظيف",
-        "قرار التوظيف بناءً على الأداء الفعلي",
-        "توظيف مباشر بناءً على النتائج",
-        "طريق مباشر للتوظيف الكامل",
-      ],
-      span: "lg:col-span-7",
+      num: 4,
+      title: "متابعة الأداء والتوظيف",
+      desc: "تقارير دورية عن أداء المتدرب، وقرار التوظيف المباشر بناءً على النتائج الفعلية.",
     },
   ];
 
   return (
     <section ref={sectionRef} className="section-padding bg-surface">
       <div className="container-main">
-        <div className="text-center mb-16">
+        <div className="text-center mb-20">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-surface-pure border border-border-light rounded-full mb-6">
             <span className="w-2 h-2 bg-brand" />
             <span className="text-text-secondary text-xs font-latin tracking-wider">HOW IT WORKS — كيف نعمل</span>
@@ -220,25 +196,26 @@ function HowItWorks() {
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
+          <div
+            aria-hidden
+            className="hidden lg:block absolute top-12 left-[12.5%] right-[12.5%] h-px border-t border-dashed border-brand/20"
+          />
           {steps.map((step) => (
-            <div
-              key={step.num}
-              className={`bento-card ${step.span} bg-surface-pure rounded-3xl p-8 lg:p-10 shadow-card hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300 border border-border-light`}
-            >
-              <div className="flex items-start justify-between mb-6">
-                <span className="font-latin text-brand font-semibold text-lg">{step.num}</span>
-                <img src="/images/abstract-lines.png" alt="" className="w-20 h-20 opacity-30 object-contain" />
+            <div key={step.num} className="bento-card relative flex flex-col items-center text-center">
+              <div className="relative mb-8">
+                <div className="w-24 h-24 rotate-45 bg-brand shadow-card flex items-center justify-center rounded-2xl">
+                  <span className="-rotate-45 font-latin font-bold text-white text-3xl leading-none">
+                    {step.num}
+                  </span>
+                </div>
               </div>
-              <h3 className="text-xl font-semibold text-text-primary mb-4">{step.title}</h3>
-              <ul className="space-y-2">
-                {step.points.map((pt, i) => (
-                  <li key={i} className="flex items-start gap-2 text-text-secondary text-sm">
-                    <Check className="w-4 h-4 text-brand mt-0.5 shrink-0" />
-                    <span>{pt}</span>
-                  </li>
-                ))}
-              </ul>
+              <h3 className="text-2xl font-bold text-gold mb-4 leading-snug">
+                {step.title}
+              </h3>
+              <p className="text-text-secondary text-sm leading-relaxed max-w-[220px]">
+                {step.desc}
+              </p>
             </div>
           ))}
         </div>
