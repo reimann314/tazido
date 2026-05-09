@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 40 25% 95%;
+    --foreground: 0 0% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
+    --primary: 168 100% 18%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 40 25% 95%;
+    --secondary-foreground: 0 0% 10%;
+    --muted: 40 20% 90%;
+    --muted-foreground: 0 0% 42%;
+    --accent: 40 40% 58%;
+    --accent-foreground: 0 0% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 40 20% 88%;
+    --input: 40 20% 88%;
+    --ring: 168 100% 18%;
+    --radius: 0.75rem;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-surface text-text-primary font-arabic antialiased;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer components {
+  .text-display {
+    font-size: clamp(2.5rem, 6vw, 5.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+  }
+  .text-h2 {
+    font-size: clamp(1.75rem, 3.5vw, 3rem);
+    line-height: 1.15;
+    font-weight: 600;
+  }
+  .section-padding {
+    padding-top: clamp(60px, 8vh, 100px);
+    padding-bottom: clamp(60px, 8vh, 100px);
+  }
+  .container-main {
+    max-width: 1280px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 bg-brand text-white rounded-full font-medium transition-all duration-300;
+  }
+  .btn-primary:hover {
+    @apply bg-brand-dark scale-[1.02];
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 bg-transparent border-[1.5px] border-white text-white rounded-full font-medium transition-all duration-300;
+  }
+  .btn-secondary:hover {
+    @apply bg-white/10;
+  }
+  .btn-dark {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 bg-text-primary text-white rounded-full font-medium transition-all duration-300;
+  }
+  .btn-dark:hover {
+    @apply bg-black scale-[1.02];
+  }
+}
