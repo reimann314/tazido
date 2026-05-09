@@ -48,11 +48,11 @@ export default function Navbar() {
         {/* Logo */}
         <Link to="/" className="flex items-center gap-1">
           <span
-            className={`text-2xl font-bold transition-colors duration-300 ${
+            className={`text-xl font-semibold uppercase tracking-[0.3em] transition-colors duration-300 ${
               scrolled || !isHome ? "text-text-primary" : "text-white"
             }`}
           >
-            Tazid
+            TAZID
           </span>
           <span
             className={`w-2 h-2 rounded-full transition-colors duration-300 ${
