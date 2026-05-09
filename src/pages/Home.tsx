@@ -334,8 +334,9 @@ function TwoPaths() {
           </div>
           <div className="path-image rounded-3xl overflow-hidden h-[400px] order-1 lg:order-2">
             <img
-              src="/images/student-workspace.jpg"
+              src="/images/Hero-2.webp"
               alt="طالب يعمل"
+              loading="lazy"
               className="w-full h-full object-cover"
             />
           </div>
