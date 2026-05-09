@@ -135,10 +135,10 @@ export default function Auth() {
               )}
               <Field name="email" type="email" label="البريد الإلكتروني" required />
               {mode === "signup" && role === "student" && (
-                <Field name="university" label="الجامعة / التخصص" />
+                <Field name="university" label="الجامعة / التخصص (اختياري)" />
               )}
               {mode === "signup" && role === "company" && (
-                <Field name="website" label="الموقع الإلكتروني" type="url" />
+                <Field name="website" label="الموقع الإلكتروني (اختياري)" placeholder="example.com" />
               )}
               <Field name="password" type="password" label="كلمة المرور" required />
 
@@ -180,11 +180,13 @@ function Field({
   label,
   type = "text",
   required,
+  placeholder,
 }: {
   name: string;
   label: string;
   type?: string;
   required?: boolean;
+  placeholder?: string;
 }) {
   return (
     <label className="block">
@@ -193,6 +195,7 @@ function Field({
         name={name}
         type={type}
         required={required}
+        placeholder={placeholder}
         className="w-full px-4 py-3 rounded-xl border border-border-light bg-surface focus:outline-none focus:border-brand focus:bg-white transition-colors"
       />
     </label>
