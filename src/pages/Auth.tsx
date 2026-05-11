@@ -47,7 +47,7 @@ export default function Auth() {
           : await signIn({ email: data.email, password: data.password });
       setToken(result.token);
       setDone(true);
-      setTimeout(() => navigate("/"), 800);
+      setTimeout(() => navigate("/dashboard"), 800);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message.replace(/^\[.*?\]\s*/, "") : "حدث خطأ";
       setError(msg);

@@ -8,7 +8,10 @@
  * @module
  */
 
+import type * as applications from "../applications.js";
 import type * as auth from "../auth.js";
+import type * as jobs from "../jobs.js";
+import type * as sessionHelpers from "../sessionHelpers.js";
 
 import type {
   ApiFromModules,
@@ -17,7 +20,10 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  applications: typeof applications;
   auth: typeof auth;
+  jobs: typeof jobs;
+  sessionHelpers: typeof sessionHelpers;
 }>;
 
 /**

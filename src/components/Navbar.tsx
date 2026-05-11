@@ -1,8 +1,27 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { gsap } from "gsap";
+import { useMutation } from "convex/react";
+import { api } from "../../convex/_generated/api";
+import { clearToken, getToken, useCurrentUser } from "../lib/auth";
 
 export default function Navbar() {
+  const me = useCurrentUser();
+  const navigate = useNavigate();
+  const signOut = useMutation(api.auth.signOut);
+  const onLogout = async () => {
+    const token = getToken();
+    if (token) {
+      try {
+        await signOut({ token });
+      } catch {
+        // ignore
+      }
+    }
+    clearToken();
+    navigate("/");
+    window.location.reload();
+  };
   const [scrolled, setScrolled] = useState(false);
   const navRef = useRef<HTMLElement>(null);
   const location = useLocation();
@@ -29,6 +48,7 @@ export default function Navbar() {
 
   const navLinks = [
     { label: "السوق", href: "/" },
+    { label: "الوظائف", href: "/jobs" },
     { label: "كيف نعمل", href: "/how-it-works" },
     { label: "للشركات", href: "/for-companies" },
     { label: "للطلاب", href: "/for-talent" },
@@ -79,24 +99,49 @@ export default function Navbar() {
 
         {/* CTA Buttons */}
         <div className="hidden md:flex items-center gap-3">
-          <Link
-            to="/login"
-            className={`text-sm font-medium transition-colors duration-300 ${
-              scrolled || !isHome ? "text-text-primary hover:text-brand" : "text-white/90 hover:text-white"
-            }`}
-          >
-            دخول
-          </Link>
-          <Link
-            to="/signup?role=company"
-            className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ${
-              scrolled || !isHome
-                ? "bg-brand text-white hover:bg-brand-dark"
-                : "bg-white/10 text-white border border-white/30 hover:bg-white/20"
-            }`}
-          >
-            سجّل شركتك
-          </Link>
+          {me ? (
+            <>
+              <Link
+                to="/dashboard"
+                className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ${
+                  scrolled || !isHome
+                    ? "bg-brand text-white hover:bg-brand-dark"
+                    : "bg-white/10 text-white border border-white/30 hover:bg-white/20"
+                }`}
+              >
+                لوحة التحكم
+              </Link>
+              <button
+                onClick={onLogout}
+                className={`text-sm font-medium transition-colors duration-300 ${
+                  scrolled || !isHome ? "text-text-primary hover:text-brand" : "text-white/90 hover:text-white"
+                }`}
+              >
+                خروج
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                to="/login"
+                className={`text-sm font-medium transition-colors duration-300 ${
+                  scrolled || !isHome ? "text-text-primary hover:text-brand" : "text-white/90 hover:text-white"
+                }`}
+              >
+                دخول
+              </Link>
+              <Link
+                to="/signup?role=company"
+                className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ${
+                  scrolled || !isHome
+                    ? "bg-brand text-white hover:bg-brand-dark"
+                    : "bg-white/10 text-white border border-white/30 hover:bg-white/20"
+                }`}
+              >
+                سجّل شركتك
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile menu button */}
