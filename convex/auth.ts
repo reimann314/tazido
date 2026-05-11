@@ -69,11 +69,17 @@ export const signUp = action({
   },
   handler: async (ctx, args): Promise<{ token: string; userId: Id<"users"> }> => {
     const email = args.email.trim().toLowerCase();
-    if (!email.includes("@")) throw new Error("بريد إلكتروني غير صالح");
-    if (args.password.length < 6) throw new Error("كلمة المرور قصيرة جداً (٦ أحرف على الأقل)");
+    if (!email.includes("@") || !email.includes(".")) {
+      throw new Error("البريد الإلكتروني غير صالح، تأكّد من الصيغة (مثال: name@example.com)");
+    }
+    if (args.password.length < 6) {
+      throw new Error("كلمة المرور قصيرة، يجب أن تحتوي على ٦ أحرف على الأقل");
+    }
 
     const existing = await ctx.runQuery(internal.auth._getUserByEmail, { email });
-    if (existing) throw new Error("هذا البريد مسجّل مسبقاً");
+    if (existing) {
+      throw new Error("هذا البريد مسجّل لدينا بالفعل. سجّل الدخول بدلاً من إنشاء حساب جديد.");
+    }
 
     const passwordHash = await hashPassword(args.password);
     const userId: Id<"users"> = await ctx.runMutation(internal.auth._insertUser, {
@@ -101,9 +107,13 @@ export const signIn = action({
   handler: async (ctx, args): Promise<{ token: string; userId: Id<"users"> }> => {
     const email = args.email.trim().toLowerCase();
     const user = await ctx.runQuery(internal.auth._getUserByEmail, { email });
-    if (!user) throw new Error("بيانات الدخول غير صحيحة");
+    if (!user) {
+      throw new Error("البريد أو كلمة المرور غير صحيحة. تحقّق من بياناتك وحاول مجدداً.");
+    }
     const hash = await hashPassword(args.password);
-    if (hash !== user.passwordHash) throw new Error("بيانات الدخول غير صحيحة");
+    if (hash !== user.passwordHash) {
+      throw new Error("البريد أو كلمة المرور غير صحيحة. تحقّق من بياناتك وحاول مجدداً.");
+    }
 
     const token = randomToken();
     await ctx.runMutation(internal.auth._createSession, {

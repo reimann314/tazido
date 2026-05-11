@@ -122,8 +122,24 @@ export default function Auth() {
           ) : (
             <form onSubmit={onSubmit} className="space-y-4">
               {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">
-                  {error}
+                <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm space-y-2">
+                  <p>{error}</p>
+                  {mode === "signup" && error.includes("مسجّل لدينا") && (
+                    <Link
+                      to={`/login?role=${role}`}
+                      className="inline-block font-medium underline"
+                    >
+                      انتقل إلى تسجيل الدخول
+                    </Link>
+                  )}
+                  {mode === "login" && error.includes("غير صحيحة") && (
+                    <Link
+                      to={`/signup?role=${role}`}
+                      className="inline-block font-medium underline"
+                    >
+                      ليس لديك حساب؟ أنشئ حساباً جديداً
+                    </Link>
+                  )}
                 </div>
               )}
               {mode === "signup" && (
