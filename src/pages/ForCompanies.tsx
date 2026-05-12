@@ -72,7 +72,7 @@ export default function ForCompanies() {
                 افتح فرصة تدريب، حدّد التخصص، وتزيد تجلب لك أفضل الطلاب.
                 المتدرب يعمل معك مباشرة — وإن أثبت كفاءته، وظّفه على الفور.
               </p>
-              <Link to="/for-companies" className="btn-primary">
+              <Link to="/signup?role=company" className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gold text-text-primary rounded-full font-medium transition-all duration-300 hover:scale-[1.02] hover:brightness-95">
                 <span>سجّل شركتك</span>
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                   <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -157,7 +157,7 @@ export default function ForCompanies() {
           <p className="text-white/75 mb-8 max-w-lg mx-auto">
             لا تنتظر موسم التخرج. افتح فرصة تدريب اليوم واختر بالتخصص.
           </p>
-          <Link to="/for-companies" className="btn-dark inline-flex">
+          <Link to="/signup?role=company" className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gold text-text-primary rounded-full font-medium transition-all duration-300 hover:scale-[1.02] hover:brightness-95">
             <span>سجّل شركتك</span>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
