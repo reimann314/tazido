@@ -7,10 +7,9 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {/* Brand Column */}
           <div className="space-y-4">
-            <div className="flex items-center gap-1">
-              <span className="text-2xl font-bold text-white">Tazid</span>
-              <span className="w-2 h-2 rounded-full bg-gold" />
-            </div>
+            <Link to="/" className="inline-block">
+              <img src="/images/logo.svg" alt="تزيد" className="h-10 w-auto" />
+            </Link>
             <p className="text-text-muted text-sm leading-relaxed">
               البنية التشغيلية لاقتصاد المواهب في المملكة العربية السعودية. متوافقون مع رؤية ٢٠٣٠.
             </p>
@@ -64,10 +63,9 @@ export default function Footer() {
 
           {/* Vision */}
           <div className="space-y-4">
-            <div className="flex items-center gap-1">
-              <span className="text-xl font-bold text-white">Tazid</span>
-              <span className="w-2 h-2 rounded-full bg-gold" />
-            </div>
+            <Link to="/" className="inline-block">
+              <img src="/images/logo.svg" alt="تزيد" className="h-8 w-auto" />
+            </Link>
             <p className="text-text-muted text-sm leading-relaxed">
               البنية التشغيلية لاقتصاد المواهب في المملكة العربية السعودية. متوافقون مع رؤية ٢٠٣٠.
             </p>

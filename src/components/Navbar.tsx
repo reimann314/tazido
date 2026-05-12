@@ -66,18 +66,11 @@ export default function Navbar() {
     >
       <div className="container-main h-full flex items-center justify-between">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-1">
-          <span
-            className={`text-xl font-semibold uppercase tracking-[0.3em] transition-colors duration-300 ${
-              scrolled || !isHome ? "text-text-primary" : "text-white"
-            }`}
-          >
-            TAZID
-          </span>
-          <span
-            className={`w-2 h-2 rounded-full transition-colors duration-300 ${
-              scrolled || !isHome ? "bg-brand" : "bg-gold"
-            }`}
+        <Link to="/" className="flex items-center">
+          <img
+            src="/images/logo.svg"
+            alt="تزيد"
+            className="h-10 w-auto"
           />
         </Link>
 
