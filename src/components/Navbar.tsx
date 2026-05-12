@@ -47,7 +47,7 @@ export default function Navbar() {
   const isHome = location.pathname === "/";
 
   const navLinks = [
-    { label: "السوق", href: "/" },
+    { label: "الرئيسية", href: "/" },
     { label: "الوظائف", href: "/jobs" },
     { label: "كيف نعمل", href: "/how-it-works" },
     { label: "للشركات", href: "/for-companies" },
