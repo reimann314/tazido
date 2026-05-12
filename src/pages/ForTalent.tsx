@@ -78,7 +78,7 @@ export default function ForTalent() {
                 لا تنتظر التخرج لتبدأ. انضم لتزيد، اعمل كمتدرب مقيم في شركة
                 سعودية تناسب تخصصك — وطريقك للوظيفة الكاملة يبدأ من أول يوم.
               </p>
-              <Link to="/for-talent" className="btn-primary">
+              <Link to="/signup?role=student" className="btn-primary">
                 <span>قدّم كطالب</span>
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                   <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -168,7 +168,7 @@ export default function ForTalent() {
           <p className="text-white/75 mb-8 max-w-lg mx-auto">
             لا تنتظر موسم التخرج. قدّم طلبك اليوم وابدأ رحلتك المهنية.
           </p>
-          <Link to="/for-talent" className="btn-dark inline-flex">
+          <Link to="/signup?role=student" className="btn-dark inline-flex">
             <span>قدّم كطالب</span>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
