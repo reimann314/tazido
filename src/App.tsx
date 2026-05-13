@@ -13,6 +13,7 @@ import Jobs from "./pages/Jobs";
 import JobDetail from "./pages/JobDetail";
 import Dashboard from "./pages/dashboard/Dashboard";
 import RequireAuth from "./components/RequireAuth";
+import RedirectIfAuth from "./components/RedirectIfAuth";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -35,8 +36,8 @@ function App() {
             <Route path="/for-companies" element={<ForCompanies />} />
             <Route path="/for-talent" element={<ForTalent />} />
             <Route path="/about" element={<About />} />
-            <Route path="/signup" element={<Auth />} />
-            <Route path="/login" element={<Auth />} />
+            <Route path="/signup" element={<RedirectIfAuth><Auth /></RedirectIfAuth>} />
+            <Route path="/login" element={<RedirectIfAuth><Auth /></RedirectIfAuth>} />
             <Route path="/jobs" element={<Jobs />} />
             <Route path="/jobs/:id" element={<JobDetail />} />
             <Route

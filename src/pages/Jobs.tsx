@@ -35,9 +35,9 @@ export default function Jobs() {
         </div>
 
         {jobs === undefined ? (
-          <p className="text-text-secondary">جاري التحميل...</p>
+          <p className="text-text-secondary">سيتم تحديث الفرص مع عملائنا الخاصين في لوحة التحكم الخاصة بكل شركة</p>
         ) : filtered.length === 0 ? (
-          <p className="text-text-secondary">لا توجد وظائف متاحة حالياً.</p>
+          <p className="text-text-secondary">قيد التحديث — الفرص متاحة حالياً لعدد محدود من المستخدمين، وسيتم فتحها للجميع قريباً.</p>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {filtered.map((job) => (

@@ -2,7 +2,8 @@ import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { GraduationCap, Users, TrendingUp, BookOpen, Palette, Code, BarChart3, Gavel, Megaphone, Cpu } from "lucide-react";
+import { GraduationCap, Users, TrendingUp, BookOpen, Palette, Code, BarChart3, Gavel, Megaphone, Cpu, LayoutDashboard } from "lucide-react";
+import { useCurrentUser } from "../lib/auth";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -36,6 +37,7 @@ const benefits = [
 ];
 
 export default function ForTalent() {
+  const me = useCurrentUser();
   const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -78,12 +80,19 @@ export default function ForTalent() {
                 لا تنتظر التخرج لتبدأ. انضم لتزيد، اعمل كمتدرب مقيم في شركة
                 سعودية تناسب تخصصك — وطريقك للوظيفة الكاملة يبدأ من أول يوم.
               </p>
-              <Link to="/signup?role=student" className="btn-primary">
-                <span>قدّم كطالب</span>
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </Link>
+              {me ? (
+                <Link to="/dashboard" className="btn-primary">
+                  <LayoutDashboard size={18} />
+                  <span>لوحة التحكم</span>
+                </Link>
+              ) : (
+                <Link to="/signup?role=student" className="btn-primary">
+                  <span>قدّم كطالب</span>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </Link>
+              )}
             </div>
             <div className="rounded-3xl overflow-hidden h-[400px]">
               <img
@@ -168,12 +177,19 @@ export default function ForTalent() {
           <p className="text-white/75 mb-8 max-w-lg mx-auto">
             لا تنتظر موسم التخرج. قدّم طلبك اليوم وابدأ رحلتك المهنية.
           </p>
-          <Link to="/signup?role=student" className="btn-dark inline-flex">
-            <span>قدّم كطالب</span>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </Link>
+          {me ? (
+            <Link to="/dashboard" className="inline-flex items-center gap-2 px-6 py-3 bg-white text-brand rounded-full font-medium transition-all duration-300 hover:bg-white/90 hover:scale-[1.02]">
+              <LayoutDashboard size={18} />
+              <span>لوحة التحكم</span>
+            </Link>
+          ) : (
+            <Link to="/signup?role=student" className="btn-dark inline-flex">
+              <span>قدّم كطالب</span>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </Link>
+          )}
         </div>
       </section>
     </main>

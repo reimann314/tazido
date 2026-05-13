@@ -8,7 +8,7 @@ export default function Footer() {
           {/* Brand Column */}
           <div className="space-y-4">
             <Link to="/" className="inline-block">
-              <img src="/images/logo.svg" alt="تزيد" className="h-10 w-auto" />
+              <img src="/images/Tazid logo all white.svg" alt="تزيد" className="h-10 w-auto" />
             </Link>
             <p className="text-text-muted text-sm leading-relaxed">
               البنية التشغيلية لاقتصاد المواهب في المملكة العربية السعودية. متوافقون مع رؤية ٢٠٣٠.
@@ -43,10 +43,10 @@ export default function Footer() {
             <ul className="space-y-3">
               <li>
                 <a
-                  href="mailto:hello@tazid.co"
+                  href="mailto:contact@tazid.co"
                   className="text-text-muted hover:text-white text-sm transition-colors duration-200"
                 >
-                  hello@tazid.co
+                  contact@tazid.co
                 </a>
               </li>
               <li className="text-text-muted text-sm">
@@ -64,7 +64,7 @@ export default function Footer() {
           {/* Vision */}
           <div className="space-y-4">
             <Link to="/" className="inline-block">
-              <img src="/images/logo.svg" alt="تزيد" className="h-8 w-auto" />
+              <img src="/images/Tazid logo all white.svg" alt="تزيد" className="h-8 w-auto" />
             </Link>
             <p className="text-text-muted text-sm leading-relaxed">
               البنية التشغيلية لاقتصاد المواهب في المملكة العربية السعودية. متوافقون مع رؤية ٢٠٣٠.

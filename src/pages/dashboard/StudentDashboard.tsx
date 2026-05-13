@@ -21,7 +21,7 @@ export default function StudentDashboard({ me }: { me: Me }) {
   );
 
   return (
-    <div className="container-main py-12 md:py-16">
+    <div>
       <h1 className="text-h2 mb-2">أهلاً، {me.name ?? "طالب"}</h1>
       <p className="text-text-secondary mb-10">تابع طلباتك واكتشف فرصاً جديدة.</p>
 

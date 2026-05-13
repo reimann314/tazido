@@ -23,7 +23,7 @@ export default function CompanyDashboard({ me }: { me: Me }) {
   const [openJobId, setOpenJobId] = useState<Id<"jobs"> | null>(null);
 
   return (
-    <div className="container-main py-12 md:py-16">
+    <div>
       <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
         <h1 className="text-h2">{me.companyName ?? "شركتك"}</h1>
         <button

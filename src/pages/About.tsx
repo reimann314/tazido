@@ -162,7 +162,7 @@ export default function About() {
               <div className="inline-flex items-center gap-2 mb-4">
                 <span className="w-2 h-2 bg-brand" />
                 <span className="text-text-secondary text-xs font-latin tracking-wider">
-                  MISK AWARD — مبادرة مسك
+                  RWAS AWARD — مبادرة مسك
                 </span>
               </div>
             </div>

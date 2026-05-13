@@ -1,10 +1,62 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, forwardRef } from "react";
 import { Link } from "react-router-dom";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Check, Award } from "lucide-react";
+import { Check, Award, LayoutDashboard } from "lucide-react";
+import { useCurrentUser } from "../lib/auth";
 
 gsap.registerPlugin(ScrollTrigger);
+
+function CtaSection({ children }: { children: React.ReactNode }) {
+  const me = useCurrentUser();
+  if (me) {
+    return (
+      <Link
+        to="/dashboard"
+        className="inline-flex items-center gap-2 px-6 py-3 bg-brand text-white rounded-full font-medium transition-all duration-300 hover:bg-brand-dark hover:scale-[1.02]"
+      >
+        <LayoutDashboard size={18} />
+        <span>لوحة التحكم</span>
+      </Link>
+    );
+  }
+  return <>{children}</>;
+}
+
+const CARD_VARIANTS = [
+  { title: "مطابقة تخصص", desc: "الطالب الصحيح في المكان الصحيح." },
+  { title: "فرص تطوع وتدريب", desc: "ابحث عن فرص تطوع وتدريب متخصصة تناسب طموحك." },
+  { title: "اكتساب خبرة", desc: "اكتسب خبرة عملية حقيقية أثناء دراستك." },
+  { title: "بناء مسار مهني", desc: "ابنِ مسارك المهني خطوة بخطوة مع تزيد." },
+];
+
+const FloatingCard = forwardRef<HTMLDivElement>(function FloatingCard(_props, ref) {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setIndex((i) => (i + 1) % CARD_VARIANTS.length);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const variant = CARD_VARIANTS[index];
+
+  return (
+    <div
+      ref={ref}
+      className="absolute bottom-6 left-6 bg-surface-pure rounded-2xl p-4 shadow-float max-w-[220px] transition-all duration-500"
+    >
+      <div className="flex items-center gap-2 mb-1">
+        <span className="w-2 h-2 rounded-sm bg-brand" />
+        <span className="text-brand font-semibold text-sm">{variant.title}</span>
+      </div>
+      <p className="text-text-secondary text-xs leading-relaxed">
+        {variant.desc}
+      </p>
+    </div>
+  );
+});
 
 /* ─── Hero ─── */
 function Hero() {
@@ -53,18 +105,7 @@ function Hero() {
           <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-l from-brand to-transparent" />
 
           {/* Floating card */}
-          <div
-            ref={cardRef}
-            className="absolute bottom-6 left-6 bg-surface-pure rounded-2xl p-4 shadow-float max-w-[220px]"
-          >
-            <div className="flex items-center gap-2 mb-1">
-              <span className="w-2 h-2 rounded-sm bg-brand" />
-              <span className="text-brand font-semibold text-sm">مطابقة تخصص</span>
-            </div>
-            <p className="text-text-secondary text-xs leading-relaxed">
-              الطالب الصحيح في المكان الصحيح.
-            </p>
-          </div>
+          <FloatingCard ref={cardRef} />
         </div>
 
         {/* Text (right in RTL) */}
@@ -87,17 +128,19 @@ function Hero() {
             مقيم، وينتهي موظفاً دائماً بناءً على أدائه.
           </p>
 
-          <div className="flex items-center gap-4 flex-wrap">
-            <Link to="/signup?role=company" className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gold text-text-primary rounded-full font-medium transition-all duration-300 hover:scale-[1.02] hover:brightness-95">
-              <span>سجّل شركتك</span>
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </Link>
-            <Link to="/for-talent" className="btn-secondary">
-              أنا طالب
-            </Link>
-          </div>
+          <CtaSection>
+            <div className="flex items-center gap-4 flex-wrap">
+              <Link to="/signup?role=company" className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gold text-text-primary rounded-full font-medium transition-all duration-300 hover:scale-[1.02] hover:brightness-95">
+                <span>سجّل شركتك</span>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </Link>
+              <Link to="/for-talent" className="btn-secondary">
+                أنا طالب
+              </Link>
+            </div>
+          </CtaSection>
         </div>
       </div>
     </section>
@@ -292,12 +335,14 @@ function TwoPaths() {
                 </li>
               ))}
             </ul>
-            <Link to="/signup?role=company" className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gold text-text-primary rounded-full font-medium transition-all duration-300 hover:scale-[1.02] hover:brightness-95">
-              <span>سجّل شركتك</span>
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </Link>
+            <CtaSection>
+              <Link to="/signup?role=company" className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gold text-text-primary rounded-full font-medium transition-all duration-300 hover:scale-[1.02] hover:brightness-95">
+                <span>سجّل شركتك</span>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </Link>
+            </CtaSection>
           </div>
         </div>
 
@@ -325,12 +370,14 @@ function TwoPaths() {
                 </li>
               ))}
             </ul>
-            <Link to="/signup?role=student" className="btn-primary">
-              <span>قدّم كطالب</span>
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </Link>
+            <CtaSection>
+              <Link to="/signup?role=student" className="btn-primary">
+                <span>قدّم كطالب</span>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </Link>
+            </CtaSection>
           </div>
           <div className="path-image rounded-3xl overflow-hidden h-[400px] order-1 lg:order-2">
             <img
@@ -423,7 +470,7 @@ function AwardSection() {
           <div className="inline-flex items-center gap-2 mb-6">
             <span className="w-2 h-2 bg-brand" />
             <span className="text-text-secondary text-xs font-latin tracking-wider">
-              MISK AWARD — مبادرة مسك
+              RWAS AWARD — مبادرة مسك
             </span>
           </div>
 
@@ -498,26 +545,24 @@ function FinalCTA() {
             لا تنتظر موسم التخرج. افتح فرصة تدريب اليوم واختر بالتخصص.
           </p>
 
-          <div className="flex items-center justify-center gap-4 flex-wrap">
-            <Link to="/signup?role=company" className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gold text-text-primary rounded-full font-medium transition-all duration-300 hover:scale-[1.02] hover:brightness-95">
-              <span>سجّل شركتك</span>
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </Link>
-            <Link to="/for-talent" className="btn-secondary">
-              أنا طالب
-            </Link>
-          </div>
+          <CtaSection>
+            <div className="flex items-center justify-center gap-4 flex-wrap">
+              <Link to="/signup?role=company" className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gold text-text-primary rounded-full font-medium transition-all duration-300 hover:scale-[1.02] hover:brightness-95">
+                <span>سجّل شركتك</span>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </Link>
+              <Link to="/for-talent" className="btn-secondary">
+                أنا طالب
+              </Link>
+            </div>
+          </CtaSection>
 
           <div className="flex items-center justify-center gap-6 mt-12 text-white/50 text-xs">
             <span className="flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-gold" />
               رؤية ٢٠٣٠
-            </span>
-            <span className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-gold" />
-              مؤسسة مسك
             </span>
             <span className="flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-gold" />

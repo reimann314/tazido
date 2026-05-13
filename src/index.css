@@ -41,6 +41,7 @@
   }
   html {
     scroll-behavior: smooth;
+    font-size: 19.2px;
   }
   body {
     @apply bg-surface text-text-primary font-arabic antialiased;

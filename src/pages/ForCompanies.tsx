@@ -2,11 +2,13 @@ import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Target, Users, TrendingUp, Briefcase } from "lucide-react";
+import { Target, Users, TrendingUp, Briefcase, LayoutDashboard } from "lucide-react";
+import { useCurrentUser } from "../lib/auth";
 
 gsap.registerPlugin(ScrollTrigger);
 
 export default function ForCompanies() {
+  const me = useCurrentUser();
   const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -72,12 +74,19 @@ export default function ForCompanies() {
                 افتح فرصة تدريب، حدّد التخصص، وتزيد تجلب لك أفضل الطلاب.
                 المتدرب يعمل معك مباشرة — وإن أثبت كفاءته، وظّفه على الفور.
               </p>
-              <Link to="/signup?role=company" className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gold text-text-primary rounded-full font-medium transition-all duration-300 hover:scale-[1.02] hover:brightness-95">
-                <span>سجّل شركتك</span>
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </Link>
+              {me ? (
+                <Link to="/dashboard" className="inline-flex items-center gap-2 px-6 py-3 bg-brand text-white rounded-full font-medium transition-all duration-300 hover:bg-brand-dark hover:scale-[1.02]">
+                  <LayoutDashboard size={18} />
+                  <span>لوحة التحكم</span>
+                </Link>
+              ) : (
+                <Link to="/signup?role=company" className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gold text-text-primary rounded-full font-medium transition-all duration-300 hover:scale-[1.02] hover:brightness-95">
+                  <span>سجّل شركتك</span>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </Link>
+              )}
             </div>
             <div className="rounded-3xl overflow-hidden h-[400px]">
               <img
@@ -126,27 +135,7 @@ export default function ForCompanies() {
         </div>
       </section>
 
-      {/* Stats */}
-      <section className="section-padding bg-surface">
-        <div className="container-main">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { value: "٩٨%", label: "نسبة التوظيف بعد الإقامة" },
-              { value: "٥٦", label: "شركة شريكة" },
-              { value: "٤٥", label: "يوم متوسط مدة الإقامة" },
-              { value: "١٢٣٤+", label: "طالب مسجّل" },
-            ].map((stat, i) => (
-              <div
-                key={i}
-                className="bg-surface-pure rounded-2xl p-8 text-center border border-border-light"
-              >
-                <div className="text-brand text-4xl font-bold mb-3">{stat.value}</div>
-                <div className="text-text-secondary text-sm">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+
 
       {/* CTA */}
       <section className="py-20 bg-brand-dark text-center">
@@ -157,12 +146,19 @@ export default function ForCompanies() {
           <p className="text-white/75 mb-8 max-w-lg mx-auto">
             لا تنتظر موسم التخرج. افتح فرصة تدريب اليوم واختر بالتخصص.
           </p>
-          <Link to="/signup?role=company" className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gold text-text-primary rounded-full font-medium transition-all duration-300 hover:scale-[1.02] hover:brightness-95">
-            <span>سجّل شركتك</span>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </Link>
+          {me ? (
+            <Link to="/dashboard" className="inline-flex items-center gap-2 px-6 py-3 bg-white text-brand rounded-full font-medium transition-all duration-300 hover:bg-white/90 hover:scale-[1.02]">
+              <LayoutDashboard size={18} />
+              <span>لوحة التحكم</span>
+            </Link>
+          ) : (
+            <Link to="/signup?role=company" className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gold text-text-primary rounded-full font-medium transition-all duration-300 hover:scale-[1.02] hover:brightness-95">
+              <span>سجّل شركتك</span>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </Link>
+          )}
         </div>
       </section>
     </main>

@@ -6,6 +6,8 @@ import { setToken } from "../lib/auth";
 
 type Role = "student" | "company";
 type Mode = "login" | "signup";
+type AcademicLevel = "" | "university" | "high-school";
+type EntityType = "" | "university" | "high-school" | "association" | "other";
 
 export default function Auth() {
   const location = useLocation();
@@ -19,6 +21,9 @@ export default function Auth() {
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [academicLevel, setAcademicLevel] = useState<AcademicLevel>("");
+  const [entityType, setEntityType] = useState<EntityType>("");
 
   const signUp = useAction(api.auth.signUp);
   const signIn = useAction(api.auth.signIn);
@@ -43,6 +48,21 @@ export default function Auth() {
               companyName: data.companyName,
               university: data.university,
               website: data.website,
+              nationalId: data.nationalId,
+              mobileNumber: data.mobileNumber,
+              academicLevel: data.academicLevel,
+              specialization: data.specialization,
+              skills: data.skills,
+              languages: data.languages,
+              hobbies: data.hobbies,
+              experiences: data.experiences,
+              entityType: data.entityType,
+              entityName: data.entityName,
+              contactNumber: data.contactNumber,
+              commercialRegistration: data.commercialRegistration,
+              activities: data.activities,
+              crValidityDate: data.crValidityDate,
+              companyAge: data.companyAge,
             })
           : await signIn({ email: data.email, password: data.password });
       setToken(result.token);
@@ -59,7 +79,7 @@ export default function Auth() {
   return (
     <div className="min-h-screen pt-[72px] bg-surface">
       <div className="container-main py-12 md:py-20">
-        <div className="max-w-lg mx-auto bg-white rounded-3xl border border-border-light shadow-sm p-6 md:p-10">
+        <div className="max-w-2xl mx-auto bg-white rounded-3xl border border-border-light shadow-sm p-6 md:p-10">
           {/* Mode tabs */}
           <div className="flex bg-surface rounded-full p-1 mb-6">
             <button
@@ -82,28 +102,29 @@ export default function Auth() {
             </button>
           </div>
 
-          {/* Role toggle */}
-          <div className="grid grid-cols-2 gap-3 mb-8">
-            {(["student", "company"] as Role[]).map((r) => (
-              <button
-                key={r}
-                type="button"
-                onClick={() => setRole(r)}
-                className={`py-3 px-4 rounded-2xl border text-sm font-medium transition-all ${
-                  role === r
-                    ? "border-brand bg-brand/5 text-brand"
-                    : "border-border-light text-text-secondary hover:border-brand/40"
-                }`}
-              >
-                {r === "student" ? "طالب / موهبة" : "شركة"}
-              </button>
-            ))}
-          </div>
+          {mode === "signup" && (
+            <div className="grid grid-cols-2 gap-3 mb-8">
+              {(["student", "company"] as Role[]).map((r) => (
+                <button
+                  key={r}
+                  type="button"
+                  onClick={() => setRole(r)}
+                  className={`py-3 px-4 rounded-2xl border text-sm font-medium transition-all ${
+                    role === r
+                      ? "border-brand bg-brand/5 text-brand"
+                      : "border-border-light text-text-secondary hover:border-brand/40"
+                  }`}
+                >
+                  {r === "student" ? "طالب / موهبة" : "شركة"}
+                </button>
+              ))}
+            </div>
+          )}
 
           <h1 className="text-h2 mb-2">
             {mode === "signup"
               ? role === "student"
-                ? "انضم لتزيد كطالب"
+                ? "صفحة تسجيل الطلاب"
                 : "سجّل شركتك في تزيد"
               : "أهلاً بعودتك"}
           </h1>
@@ -120,7 +141,7 @@ export default function Auth() {
               <p className="text-sm text-text-secondary">جاري التحويل...</p>
             </div>
           ) : (
-            <form onSubmit={onSubmit} className="space-y-4">
+            <form onSubmit={onSubmit} className="space-y-5">
               {error && (
                 <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm space-y-2">
                   <p>{error}</p>
@@ -142,27 +163,127 @@ export default function Auth() {
                   )}
                 </div>
               )}
-              {mode === "signup" && (
-                <Field
-                  name={role === "company" ? "companyName" : "fullName"}
-                  label={role === "company" ? "اسم الشركة" : "الاسم الكامل"}
-                  required
-                />
+
+              {/* ===== LOGIN FIELDS ===== */}
+              {mode === "login" && (
+                <div className="space-y-4">
+                  <Field name="email" type="email" label="البريد الإلكتروني" required />
+                  <Field name="password" type="password" label="كلمة المرور" required />
+                </div>
               )}
-              <Field name="email" type="email" label="البريد الإلكتروني" required />
+
+              {/* ===== STUDENT SIGNUP FIELDS ===== */}
               {mode === "signup" && role === "student" && (
-                <Field name="university" label="الجامعة / التخصص (اختياري)" />
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-sm font-semibold text-text-primary mb-3 flex items-center gap-2">
+                      <span className="w-5 h-5 rounded-full bg-brand/10 flex items-center justify-center text-brand text-[10px]">1</span>
+                      المعلومات الأساسية
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <Field name="fullName" label="اسم الطالب" required />
+                      <Field name="nationalId" label="السجل المدني" />
+                      <Field name="email" type="email" label="الايميل" required />
+                      <Field name="mobileNumber" type="tel" label="رقم الجوال" placeholder="05xxxxxxxx" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-sm font-semibold text-text-primary mb-3 flex items-center gap-2">
+                      <span className="w-5 h-5 rounded-full bg-brand/10 flex items-center justify-center text-brand text-[10px]">2</span>
+                      المستوى الأكاديمي
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <SelectField
+                        name="academicLevel"
+                        label="السنة الدراسية"
+                        value={academicLevel}
+                        onChange={setAcademicLevel}
+                        options={[
+                          { value: "", label: "اختر السنة الدراسية" },
+                          { value: "university", label: "جامعي" },
+                          { value: "high-school", label: "ثانوي" },
+                        ]}
+                      />
+                      <Field name="specialization" label="التخصص" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-sm font-semibold text-text-primary mb-3 flex items-center gap-2">
+                      <span className="w-5 h-5 rounded-full bg-brand/10 flex items-center justify-center text-brand text-[10px]">3</span>
+                      المهارات والاهتمامات
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <TextAreaField name="skills" label="المهارات" />
+                      <TextAreaField name="languages" label="اللغات" />
+                      <TextAreaField name="hobbies" label="الهوايات" />
+                      <TextAreaField name="experiences" label="الخبرات" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-sm font-semibold text-text-primary mb-3 flex items-center gap-2">
+                      <span className="w-5 h-5 rounded-full bg-brand/10 flex items-center justify-center text-brand text-[10px]">4</span>
+                      الجهة
+                    </h3>
+                    <div className="space-y-4">
+                      <SelectField
+                        name="entityType"
+                        label="نوع الجهة"
+                        value={entityType}
+                        onChange={setEntityType}
+                        options={[
+                          { value: "", label: "اختر نوع الجهة" },
+                          { value: "university", label: "جامعة" },
+                          { value: "high-school", label: "ثانوية" },
+                          { value: "association", label: "جمعية (مثال: أيتام)" },
+                          { value: "other", label: "أخرى (دعم استثناءات)" },
+                        ]}
+                      />
+                      <Field
+                        name="entityName"
+                        label={
+                          entityType === "university" ? "اسم الجامعة" :
+                          entityType === "high-school" ? "اسم الثانوية" :
+                          entityType === "association" ? "اسم الجمعية" :
+                          entityType === "other" ? "تفاصيل أخرى" :
+                          "اسم الجهة"
+                        }
+                        placeholder={
+                          entityType === "association" ? "مثال: جمعية أيتام..." :
+                          entityType === "other" ? "يرجى التوضيح..." : ""
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <Field name="password" type="password" label="كلمة المرور" required />
+                </div>
               )}
+
+              {/* ===== COMPANY SIGNUP FIELDS ===== */}
               {mode === "signup" && role === "company" && (
-                <Field name="website" label="الموقع الإلكتروني (اختياري)" placeholder="example.com" />
+                <div className="space-y-4">
+                  <Field name="companyName" label="اسم الشركة" required />
+                  <Field name="email" type="email" label="البريد الإلكتروني" required />
+                  <Field name="contactNumber" type="tel" label="رقم التواصل" placeholder="05xxxxxxxx" />
+                  <Field name="commercialRegistration" label="رقم السجل التجاري" />
+                  <TextAreaField name="activities" label="أعمال ومهام الشركة" />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Field name="crValidityDate" type="text" label="تاريخ سريان السجل التجاري" placeholder="هجري / ميلادي" />
+                    <Field name="companyAge" type="text" label="عمر الشركة أو المؤسسة" placeholder="بالسنوات" />
+                  </div>
+                  <Field name="website" label="الموقع الإلكتروني" placeholder="example.com" />
+                  <Field name="password" type="password" label="كلمة المرور" required />
+                </div>
               )}
-              <Field name="password" type="password" label="كلمة المرور" required />
 
               <button type="submit" disabled={submitting} className="btn-primary w-full disabled:opacity-60">
                 {submitting
                   ? "جاري الإرسال..."
                   : mode === "signup"
-                  ? "إنشاء الحساب"
+                  ? role === "student" ? "تسجيل" : "إنشاء الحساب"
                   : "تسجيل الدخول"}
               </button>
 
@@ -191,22 +312,10 @@ export default function Auth() {
   );
 }
 
-function Field({
-  name,
-  label,
-  type = "text",
-  required,
-  placeholder,
-}: {
-  name: string;
-  label: string;
-  type?: string;
-  required?: boolean;
-  placeholder?: string;
-}) {
+function Field({ name, label, type = "text", required, placeholder }: { name: string; label: string; type?: string; required?: boolean; placeholder?: string }) {
   return (
     <label className="block">
-      <span className="block text-sm font-medium mb-1.5 text-text-primary">{label}</span>
+      <span className="block text-sm font-medium mb-1.5 text-text-primary">{label}{required && <span className="text-red-500 mr-0.5">*</span>}</span>
       <input
         name={name}
         type={type}
@@ -214,6 +323,38 @@ function Field({
         placeholder={placeholder}
         className="w-full px-4 py-3 rounded-xl border border-border-light bg-surface focus:outline-none focus:border-brand focus:bg-white transition-colors"
       />
+    </label>
+  );
+}
+
+function TextAreaField({ name, label, required }: { name: string; label: string; required?: boolean }) {
+  return (
+    <label className="block">
+      <span className="block text-sm font-medium mb-1.5 text-text-primary">{label}</span>
+      <textarea
+        name={name}
+        required={required}
+        rows={3}
+        className="w-full px-4 py-3 rounded-xl border border-border-light bg-surface focus:outline-none focus:border-brand focus:bg-white transition-colors resize-none"
+      />
+    </label>
+  );
+}
+
+function SelectField({ name, label, value, onChange, options }: { name: string; label: string; value: string; onChange: (v: any) => void; options: { value: string; label: string }[] }) {
+  return (
+    <label className="block">
+      <span className="block text-sm font-medium mb-1.5 text-text-primary">{label}</span>
+      <select
+        name={name}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full px-4 py-3 rounded-xl border border-border-light bg-surface focus:outline-none focus:border-brand focus:bg-white transition-colors"
+      >
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>{o.label}</option>
+        ))}
+      </select>
     </label>
   );
 }
