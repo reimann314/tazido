@@ -63,7 +63,10 @@ export const _insertUser = internalMutation({
     contactNumber: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    return await ctx.db.insert("users", args);
+    const clean = Object.fromEntries(
+      Object.entries(args).filter(([_, v]) => v !== undefined),
+    ) as typeof args;
+    return await ctx.db.insert("users", clean);
   },
 });
 
@@ -155,6 +158,64 @@ export const signUp = action({
       token,
       expiresAt: Date.now() + SESSION_TTL_MS,
     });
+
+    // Send welcome email via Resend
+    try {
+      const apiKey = process.env.RESEND_API_KEY;
+      const from = process.env.RESEND_FROM ?? "Tazid <onboarding@resend.dev>";
+      const displayName = args.role === "company" ? args.companyName : args.name;
+      if (apiKey) {
+        await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            from,
+            to: email,
+            subject: "مرحباً بك في تزيد",
+            html: `<!DOCTYPE html>
+<html dir="rtl">
+<head><meta charset="utf-8"></head>
+<body style="font-family: Arial, sans-serif; background: #f5f5f5; padding: 40px 20px;">
+  <table align="center" style="max-width: 600px; width: 100%; background: white; border-radius: 16px; overflow: hidden;">
+    <tr>
+      <td style="background: linear-gradient(135deg, #1a3a3a, #2d6a5e); padding: 30px; text-align: center;">
+        <h1 style="color: white; margin: 0; font-size: 28px;">مرحباً بك في <span style="color: #d4a853;">تزيد</span></h1>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding: 30px;">
+        <p style="font-size: 18px; color: #333;">مرحباً ${displayName || "عزيزي المستخدم"}،</p>
+        <p style="font-size: 15px; color: #666; line-height: 1.8;">
+          نشكرك على التسجيل في منصة تزيد. نحن متحمسون لانضمامك إلينا!
+        </p>
+        <p style="font-size: 15px; color: #666; line-height: 1.8;">
+          ${args.role === "company" ? "يمكنك الآن استكمال ملف منشئتك والبدء في رحلة التوظيف." : "يمكنك الآن استكمال ملفك الشخصي والبدء في رحلة البحث عن الفرص."}
+        </p>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="https://tazid.co/dashboard"
+             style="display: inline-block; padding: 12px 32px; background: linear-gradient(135deg, #1a3a3a, #2d6a5e); color: white; text-decoration: none; border-radius: 8px; font-size: 16px;">
+            الذهاب إلى لوحة التحكم
+          </a>
+        </div>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+        <p style="font-size: 13px; color: #999; text-align: center;">
+          © 2026 تزيد | جميع الحقوق محفوظة
+        </p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`,
+          }),
+        });
+      }
+    } catch (err) {
+      console.error("Failed to send welcome email", err);
+    }
+
     return { token, userId };
   },
 });

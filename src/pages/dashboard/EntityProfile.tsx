@@ -32,8 +32,8 @@ export default function EntityProfile() {
               <p className="text-white/70 text-base md:text-lg mt-1">الشركات أو المؤسسات</p>
             </div>
           </div>
-          <div className="bg-white/[0.08] backdrop-blur-sm rounded-2xl p-7 md:p-8 border border-white/[0.06] hover:bg-white/[0.10] transition-all duration-300">
-            <div className="flex items-start gap-4">
+          <div className="bg-white/[0.08] backdrop-blur-sm rounded-2xl p-5 md:p-8 border border-white/[0.06] hover:bg-white/[0.10] transition-all duration-300">
+            <div className="flex flex-col sm:flex-row items-start gap-4">
               <span className="w-12 h-12 rounded-full bg-gold/30 flex items-center justify-center shrink-0 mt-1">
                 <Shield size={22} className="text-gold" />
               </span>

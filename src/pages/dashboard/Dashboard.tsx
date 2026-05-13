@@ -73,7 +73,7 @@ export default function Dashboard() {
   };
 
   const sidebar = (
-    <aside className="w-72 lg:w-80 bg-white border-r border-border-light flex flex-col shrink-0 min-h-[calc(100vh-72px)]">
+    <aside className="w-72 lg:w-80 bg-white border-l border-border-light flex flex-col shrink-0 min-h-[calc(100vh-72px)]">
       <div className="p-4 lg:p-5 border-b border-border-light">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
@@ -166,7 +166,7 @@ export default function Dashboard() {
   );
 
   return (
-    <div className="min-h-screen pt-[72px] bg-surface flex flex-row-reverse relative">
+    <div className="min-h-screen pt-[72px] bg-surface flex flex-row relative">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div
@@ -187,9 +187,10 @@ export default function Dashboard() {
       {/* Mobile toggle button */}
       <button
         onClick={() => setSidebarOpen(true)}
-        className="lg:hidden fixed bottom-6 left-6 z-30 w-14 h-14 rounded-full bg-brand text-white shadow-lg flex items-center justify-center hover:bg-brand-dark transition-all active:scale-95"
+        className="lg:hidden fixed bottom-6 right-6 z-30 bg-brand text-white shadow-lg flex items-center gap-2 px-5 py-3 rounded-full hover:bg-brand-dark transition-all active:scale-95"
       >
-        <Menu size={24} />
+        <Menu size={20} />
+        <span className="text-sm font-medium">لوحة التحكم</span>
       </button>
 
       {/* Main Content */}
