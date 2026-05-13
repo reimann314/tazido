@@ -11,12 +11,6 @@ import CompanyDashboard from "./CompanyDashboard";
 import EntityProfile from "./EntityProfile";
 import StudentFolder from "./StudentFolder";
 
-type Me = {
-  name?: string;
-  companyName?: string;
-  role: "student" | "company";
-};
-
 type Page = "dashboard" | "entity-profile" | "student-folder" | "applications" | "candidates" | "reports" | "team" | "career" | "skills" | "settings";
 
 type NavItem = {
