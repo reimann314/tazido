@@ -2,12 +2,11 @@ import { useState } from "react";
 import { useAction } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useCurrentUser } from "../../lib/auth";
-import { Lock, Shield, Mail, User } from "lucide-react";
+import { Lock, Shield, User } from "lucide-react";
 
 export default function SettingsPage() {
   const me = useCurrentUser();
   const requestPasswordReset = useAction(api.auth.requestPasswordReset);
-  const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -19,7 +18,7 @@ export default function SettingsPage() {
     setError("");
     setSubmitting(true);
     try {
-      await requestPasswordReset({ email: email || me.email });
+      await requestPasswordReset({ email: me.email });
       setSent(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "حدث خطأ");
