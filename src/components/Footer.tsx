@@ -81,15 +81,6 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Vision */}
-          <div className="space-y-4">
-            <Link to="/" className="inline-block">
-              <img src="/images/Tazid logo all white.svg" alt="تزيد" className="h-8 w-auto" />
-            </Link>
-            <p className="text-text-muted text-sm leading-relaxed">
-              البنية التشغيلية لاقتصاد المواهب في المملكة العربية السعودية. متوافقون مع رؤية ٢٠٣٠.
-            </p>
-          </div>
         </div>
       </div>
 
