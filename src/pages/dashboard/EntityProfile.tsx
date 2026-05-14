@@ -62,19 +62,21 @@ export default function EntityProfile() {
     try {
       await updateProfile({
         token,
-        companyName: formData.companyName || undefined,
-        website: formData.website || undefined,
-        commercialRegistration: formData.commercialRegistration || undefined,
-        activities: formData.activities || undefined,
-        crValidityDate: formData.crValidityDate || undefined,
-        companyAge: formData.companyAge || undefined,
-        contactNumber: formData.contactNumber || undefined,
+        companyName: formData.companyName,
+        commercialRegistration: formData.commercialRegistration,
+        activities: formData.activities,
+        crValidityDate: formData.crValidityDate,
+        companyAge: formData.companyAge,
+        contactNumber: formData.contactNumber,
+        website: formData.website,
       });
       setDone(true);
       setEditing(false);
       setTimeout(() => setDone(false), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "حدث خطأ");
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error("Profile update error:", err);
+      setError(msg);
     } finally {
       setSubmitting(false);
     }

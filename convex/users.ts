@@ -43,16 +43,15 @@ export const updateCompanyProfile = mutation({
     companyAge: v.optional(v.string()),
     contactNumber: v.optional(v.string()),
   },
-  handler: async (ctx, { token, ...updates }) => {
+  handler: async (ctx, args) => {
+    const { token, ...updates } = args;
     const user = await getUserFromToken(ctx, token);
     if (user.role !== "company") throw new Error("غير مصرّح");
-    const cleaned: Record<string, unknown> = {};
+    const patched: Record<string, unknown> = {};
     for (const [key, val] of Object.entries(updates)) {
-      if (val !== undefined) cleaned[key] = val;
+      if (typeof val === "string") patched[key] = val;
     }
-    if (Object.keys(cleaned).length > 0) {
-      await ctx.db.patch(user._id, cleaned);
-    }
+    await ctx.db.patch(user._id, patched);
     return true;
   },
 });
