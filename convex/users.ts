@@ -47,11 +47,13 @@ export const updateCompanyProfile = mutation({
     const { token, ...updates } = args;
     const user = await getUserFromToken(ctx, token);
     if (user.role !== "company") throw new Error("غير مصرّح");
-    const patched: Record<string, unknown> = {};
+    const patched: Record<string, string> = {};
     for (const [key, val] of Object.entries(updates)) {
-      if (typeof val === "string") patched[key] = val;
+      if (val) patched[key] = val;
     }
-    await ctx.db.patch(user._id, patched);
+    if (Object.keys(patched).length > 0) {
+      await ctx.db.patch(user._id, patched);
+    }
     return true;
   },
 });
