@@ -60,7 +60,16 @@ export default function EntityProfile() {
     setError(null);
     setDone(false);
     try {
-      await updateProfile({ token, ...formData });
+      await updateProfile({
+        token,
+        companyName: formData.companyName || undefined,
+        website: formData.website || undefined,
+        commercialRegistration: formData.commercialRegistration || undefined,
+        activities: formData.activities || undefined,
+        crValidityDate: formData.crValidityDate || undefined,
+        companyAge: formData.companyAge || undefined,
+        contactNumber: formData.contactNumber || undefined,
+      });
       setDone(true);
       setEditing(false);
       setTimeout(() => setDone(false), 3000);
