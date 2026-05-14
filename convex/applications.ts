@@ -101,6 +101,37 @@ export const listByJob = query({
   },
 });
 
+export const listByCompany = query({
+  args: { token: v.string() },
+  handler: async (ctx, { token }) => {
+    const user = await requireRole(ctx, token, "company");
+    const jobs = await ctx.db
+      .query("jobs")
+      .withIndex("by_company", (q) => q.eq("companyId", user._id))
+      .collect();
+    const allApps = [];
+    for (const job of jobs) {
+      const apps = await ctx.db
+        .query("applications")
+        .withIndex("by_job", (q) => q.eq("jobId", job._id))
+        .collect();
+      for (const app of apps) {
+        const student = await ctx.db.get(app.studentId);
+        allApps.push({
+          _id: app._id,
+          status: app.status,
+          appliedAt: app.appliedAt,
+          jobId: app.jobId,
+          jobTitle: job.title,
+          studentName: student?.name ?? "—",
+          studentEmail: student?.email ?? "",
+        });
+      }
+    }
+    return allApps.sort((a, b) => b.appliedAt - a.appliedAt);
+  },
+});
+
 export const setStatus = mutation({
   args: {
     token: v.string(),

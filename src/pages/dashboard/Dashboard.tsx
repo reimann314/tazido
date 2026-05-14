@@ -10,6 +10,12 @@ import StudentDashboard from "./StudentDashboard";
 import CompanyDashboard from "./CompanyDashboard";
 import EntityProfile from "./EntityProfile";
 import StudentFolder from "./StudentFolder";
+import StudentApplications from "./StudentApplications";
+import CareerPath from "./CareerPath";
+import SkillsPage from "./SkillsPage";
+import SettingsPage from "./SettingsPage";
+import CandidatesPage from "./CandidatesPage";
+import ReportsPage from "./ReportsPage";
 
 type Page = "dashboard" | "entity-profile" | "student-folder" | "applications" | "candidates" | "reports" | "team" | "career" | "skills" | "settings";
 
@@ -19,8 +25,6 @@ type NavItem = {
   icon: React.ReactNode;
   comingSoon?: boolean;
 };
-
-const COMING_SOON_MSG = "قريباً - سيتم تفعيل هذه الميزة مع عملائنا الأوائل، وهي غير متاحة لجميع المستخدمين حالياً";
 
 export default function Dashboard() {
   const me = useCurrentUser();
@@ -33,19 +37,19 @@ export default function Dashboard() {
   const studentLinks: NavItem[] = [
     { label: "الرئيسية", key: "dashboard", icon: <LayoutDashboard size={20} /> },
     { label: "الملف الشخصي", key: "student-folder", icon: <FolderOpen size={20} /> },
-    { label: "طلباتي", key: "applications", icon: <FileText size={20} />, comingSoon: true },
-    { label: "المسار المهني", key: "career", icon: <TrendingUp size={20} />, comingSoon: true },
-    { label: "المهارات والشهادات", key: "skills", icon: <Award size={20} />, comingSoon: true },
-    { label: "الإعدادات", key: "settings", icon: <Settings size={20} />, comingSoon: true },
+    { label: "طلباتي", key: "applications", icon: <FileText size={20} /> },
+    { label: "المسار المهني", key: "career", icon: <TrendingUp size={20} /> },
+    { label: "المهارات والشهادات", key: "skills", icon: <Award size={20} /> },
+    { label: "الإعدادات", key: "settings", icon: <Settings size={20} /> },
   ];
 
   const companyLinks: NavItem[] = [
     { label: "الرئيسية", key: "dashboard", icon: <LayoutDashboard size={20} /> },
     { label: "ملف المنشئة", key: "entity-profile", icon: <FolderOpen size={20} /> },
-    { label: "المرشحون", key: "candidates", icon: <Users size={20} />, comingSoon: true },
-    { label: "التقارير", key: "reports", icon: <TrendingUp size={20} />, comingSoon: true },
+    { label: "المرشحون", key: "candidates", icon: <Users size={20} /> },
+    { label: "التقارير", key: "reports", icon: <TrendingUp size={20} /> },
     { label: "فريق العمل", key: "team", icon: <Users size={20} />, comingSoon: true },
-    { label: "الإعدادات", key: "settings", icon: <Settings size={20} />, comingSoon: true },
+    { label: "الإعدادات", key: "settings", icon: <Settings size={20} /> },
   ];
 
   const links = isStudent ? studentLinks : companyLinks;
@@ -67,6 +71,18 @@ export default function Dashboard() {
         return <EntityProfile />;
       case "student-folder":
         return <StudentFolder />;
+      case "applications":
+        return <StudentApplications />;
+      case "career":
+        return <CareerPath />;
+      case "skills":
+        return <SkillsPage />;
+      case "settings":
+        return <SettingsPage />;
+      case "candidates":
+        return <CandidatesPage />;
+      case "reports":
+        return <ReportsPage />;
       default:
         return isStudent ? <StudentDashboard me={me} /> : <CompanyDashboard me={me} />;
     }
@@ -103,7 +119,6 @@ export default function Dashboard() {
               key={item.key}
               onClick={() => handleNavClick(item)}
               disabled={item.comingSoon}
-              title={item.comingSoon ? COMING_SOON_MSG : undefined}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-right ${
                 isActive
                   ? "bg-brand text-white font-medium"
