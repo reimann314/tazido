@@ -8,6 +8,7 @@ import {
   JobStatusBadge,
   StatusBadge,
 } from "../../components/StatusBadge";
+import { TableSkeleton } from "../../components/LoadingSkeletons";
 
 type Me = { name?: string; companyName?: string };
 type JobType = "internship" | "full-time" | "part-time";
@@ -42,9 +43,9 @@ export default function CompanyDashboard({ me }: { me: Me }) {
       <section className="mt-8">
         <h2 className="text-h3 mb-4">وظائفي</h2>
         {jobs === undefined ? (
-          <p className="text-text-secondary">جاري التحميل...</p>
+          <TableSkeleton rows={3} />
         ) : jobs.length === 0 ? (
-          <p className="text-text-secondary">لم تنشر أي وظيفة بعد.</p>
+          <p className="text-text-secondary bg-white rounded-2xl border border-border-light p-6">لم تنشر أي وظيفة بعد.</p>
         ) : (
           <div className="space-y-3">
             {jobs.map((job) => (
@@ -192,7 +193,7 @@ function Applicants({ jobId, token }: { jobId: Id<"jobs">; token: string }) {
   const setStatus = useMutation(api.applications.setStatus);
 
   if (applicants === undefined) {
-    return <p className="px-5 pb-5 text-text-secondary text-sm">جاري التحميل...</p>;
+    return <div className="px-5 pb-5"><TableSkeleton rows={2} /></div>;
   }
   if (applicants.length === 0) {
     return <p className="px-5 pb-5 text-text-secondary text-sm">لا يوجد متقدّمون بعد.</p>;

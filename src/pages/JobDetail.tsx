@@ -5,6 +5,7 @@ import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { useCurrentUser, getToken } from "../lib/auth";
 import { JOB_TYPE_LABELS, StatusBadge } from "../components/StatusBadge";
+import { JobDetailSkeleton } from "../components/LoadingSkeletons";
 
 export default function JobDetail() {
   const { id } = useParams<{ id: string }>();
@@ -26,8 +27,10 @@ export default function JobDetail() {
 
   if (job === undefined) {
     return (
-      <div className="min-h-screen pt-[72px] flex items-center justify-center text-text-secondary">
-        جاري التحميل...
+      <div className="min-h-screen pt-[72px] bg-surface">
+        <div className="container-main py-12 md:py-16">
+          <JobDetailSkeleton />
+        </div>
       </div>
     );
   }

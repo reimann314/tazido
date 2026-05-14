@@ -2,13 +2,23 @@ import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { getToken } from "../../lib/auth";
 import { Briefcase, FileText, Eye, TrendingUp } from "lucide-react";
+import { StatsCardSkeleton, TableSkeleton } from "../../components/LoadingSkeletons";
 
 export default function ReportsPage() {
   const token = getToken() ?? undefined;
   const jobs = useQuery(api.jobs.listByCompany, token ? { token } : "skip");
 
   if (!jobs) {
-    return <p className="text-text-secondary">جاري التحميل...</p>;
+    return (
+      <div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <StatsCardSkeleton key={i} />
+          ))}
+        </div>
+        <TableSkeleton rows={3} />
+      </div>
+    );
   }
 
   const totalJobs = jobs.length;

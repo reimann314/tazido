@@ -3,6 +3,7 @@ import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { getToken } from "../../lib/auth";
 import { StatusBadge } from "../../components/StatusBadge";
+import { TableSkeleton } from "../../components/LoadingSkeletons";
 
 export default function StudentApplications() {
   const token = getToken() ?? undefined;
@@ -18,7 +19,7 @@ export default function StudentApplications() {
 
       <div className="bg-white rounded-2xl border border-border-light overflow-hidden">
         {myApps === undefined ? (
-          <p className="p-6 text-text-secondary">جاري التحميل...</p>
+          <TableSkeleton rows={3} />
         ) : myApps.length === 0 ? (
           <div className="p-12 text-center">
             <p className="text-text-secondary mb-4">لم تتقدّم لأي وظيفة بعد.</p>

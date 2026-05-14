@@ -1,16 +1,22 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useQuery } from "convex/react";
+import { usePaginatedQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { JOB_TYPE_LABELS } from "../components/StatusBadge";
+import { CardSkeleton } from "../components/LoadingSkeletons";
 
 type JobType = "all" | "internship" | "full-time" | "part-time";
 
 export default function Jobs() {
   const [filter, setFilter] = useState<JobType>("all");
-  const jobs = useQuery(api.jobs.list, {});
+  const results = usePaginatedQuery(
+    api.jobs.list,
+    {},
+    { initialNumItems: 12 },
+  );
 
-  const filtered = jobs?.filter((j) => filter === "all" || j.type === filter) ?? [];
+  const allJobs = results.results ?? [];
+  const filtered = allJobs.filter((j) => filter === "all" || j.type === filter);
 
   return (
     <div className="min-h-screen pt-[72px] bg-surface">
@@ -34,9 +40,13 @@ export default function Jobs() {
           ))}
         </div>
 
-        {jobs === undefined ? (
-          <p className="text-text-secondary">سيتم تحديث الفرص مع عملائنا الخاصين في لوحة التحكم الخاصة بكل شركة</p>
-        ) : filtered.length === 0 ? (
+        {results.isLoading ? (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <CardSkeleton key={i} />
+            ))}
+          </div>
+        ) : allJobs.length === 0 ? (
           <p className="text-text-secondary">قيد التحديث — الفرص متاحة حالياً لعدد محدود من المستخدمين، وسيتم فتحها للجميع قريباً.</p>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -62,6 +72,17 @@ export default function Jobs() {
                 <p className="text-sm text-text-secondary">{job.location}</p>
               </Link>
             ))}
+          </div>
+        )}
+
+        {results.status === "CanLoadMore" && (
+          <div className="mt-10 text-center">
+            <button
+              onClick={() => results.loadMore(12)}
+              className="px-8 py-3 rounded-full bg-white border border-border-light text-text-secondary font-medium hover:border-brand/40 hover:text-brand transition-all"
+            >
+              عرض المزيد
+            </button>
           </div>
         )}
       </div>

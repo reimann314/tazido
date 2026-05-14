@@ -1,5 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { internal } from "./_generated/api";
+import { paginationOptsValidator } from "convex/server";
 import { getUserFromToken, requireRole } from "./sessionHelpers";
 
 const jobTypeValidator = v.union(
@@ -9,20 +11,21 @@ const jobTypeValidator = v.union(
 );
 
 export const list = query({
-  args: { limit: v.optional(v.number()) },
-  handler: async (ctx, { limit }) => {
-    const jobs = await ctx.db
+  args: { paginationOpts: paginationOptsValidator },
+  handler: async (ctx, { paginationOpts }) => {
+    const result = await ctx.db
       .query("jobs")
       .withIndex("by_status", (q) => q.eq("status", "open"))
       .order("desc")
-      .take(limit ?? 50);
+      .paginate(paginationOpts);
 
-    return await Promise.all(
-      jobs.map(async (job) => {
+    const page = await Promise.all(
+      result.page.map(async (job) => {
         const company = await ctx.db.get(job.companyId);
         return { ...job, companyName: company?.companyName ?? "شركة", companyVerified: company?.verified === true };
       }),
     );
+    return { ...result, page };
   },
 });
 
@@ -70,7 +73,7 @@ export const create = mutation({
     const user = await requireRole(ctx, args.token, "company");
     if (!args.title.trim()) throw new Error("العنوان مطلوب");
     if (!args.description.trim()) throw new Error("الوصف مطلوب");
-    return await ctx.db.insert("jobs", {
+    const jobId = await ctx.db.insert("jobs", {
       companyId: user._id,
       title: args.title.trim(),
       description: args.description.trim(),
@@ -79,6 +82,11 @@ export const create = mutation({
       status: "open",
       createdAt: Date.now(),
     });
+    await ctx.runMutation(internal.stats._updateJobCounter, {
+      op: "increment",
+      open: true,
+    });
+    return jobId;
   },
 });
 
@@ -93,7 +101,15 @@ export const setStatus = mutation({
     const job = await ctx.db.get(jobId);
     if (!job) throw new Error("الوظيفة غير موجودة");
     if (job.companyId !== user._id) throw new Error("غير مصرّح");
+    const wasOpen = job.status === "open";
+    const nowOpen = status === "open";
     await ctx.db.patch(jobId, { status });
+    if (wasOpen !== nowOpen) {
+      await ctx.runMutation(internal.stats._updateJobCounter, {
+        op: nowOpen ? "increment" : "decrement",
+        open: true,
+      });
+    }
   },
 });
 

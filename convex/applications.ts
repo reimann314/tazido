@@ -33,6 +33,11 @@ export const apply = mutation({
       appliedAt: Date.now(),
     });
 
+    await ctx.runMutation(internal.stats._updateApplicationCounter, {
+      op: "increment",
+      pending: true,
+    });
+
     await ctx.runMutation(internal.notifications._create, {
       userId: job.companyId,
       type: "new_application",
@@ -144,7 +149,15 @@ export const setStatus = mutation({
     if (!app) throw new Error("الطلب غير موجود");
     const job = await ctx.db.get(app.jobId);
     if (!job || job.companyId !== user._id) throw new Error("غير مصرّح");
+    const wasPending = app.status === "pending";
+    const nowPending = status === "pending";
     await ctx.db.patch(applicationId, { status });
+    if (wasPending !== nowPending) {
+      await ctx.runMutation(internal.stats._updateApplicationCounter, {
+        op: nowPending ? "increment" : "decrement",
+        pending: true,
+      });
+    }
 
     const labels: Record<string, string> = {
       reviewed: "تمت مراجعة طلبك",

@@ -15,6 +15,8 @@ import type * as jobs from "../jobs.js";
 import type * as notifications from "../notifications.js";
 import type * as seed from "../seed.js";
 import type * as sessionHelpers from "../sessionHelpers.js";
+import type * as stats from "../stats.js";
+import type * as users from "../users.js";
 
 import type {
   ApiFromModules,
@@ -30,6 +32,8 @@ declare const fullApi: ApiFromModules<{
   notifications: typeof notifications;
   seed: typeof seed;
   sessionHelpers: typeof sessionHelpers;
+  stats: typeof stats;
+  users: typeof users;
 }>;
 
 /**

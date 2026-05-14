@@ -52,7 +52,13 @@ export default function NotificationsBell() {
           </div>
           <div className="max-h-80 overflow-y-auto">
             {!notifications ? (
-              <div className="p-6 text-center text-sm text-text-secondary">جاري التحميل...</div>
+              <div className="p-6 text-center text-sm text-text-secondary">
+                <div className="animate-pulse space-y-3">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="h-10 bg-gray-100 rounded-lg" />
+                  ))}
+                </div>
+              </div>
             ) : notifications.length === 0 ? (
               <div className="p-6 text-center text-sm text-text-secondary">لا توجد إشعارات</div>
             ) : (

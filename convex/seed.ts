@@ -19,11 +19,24 @@ export const seedAdmin = internalMutation({
       .unique();
     if (existing) return;
 
-    const data = new TextEncoder().encode("tazid2026" + "::tazid-admin::v1");
-    const buf = await crypto.subtle.digest("SHA-256", data);
-    const passwordHash = Array.from(new Uint8Array(buf))
-      .map((b) => b.toString(16).padStart(2, "0"))
-      .join("");
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const keyMaterial = await crypto.subtle.importKey(
+      "raw",
+      new TextEncoder().encode("tazid2026"),
+      { name: "PBKDF2" },
+      false,
+      ["deriveBits"],
+    );
+    const hash = await crypto.subtle.deriveBits(
+      { name: "PBKDF2", salt, iterations: 100_000, hash: "SHA-256" },
+      keyMaterial,
+      512,
+    );
+    const passwordHash = `$pbkdf2-sha256$100000$${
+      btoa(String.fromCharCode(...salt))
+    }$${
+      btoa(String.fromCharCode(...new Uint8Array(hash)))
+    }`;
 
     await ctx.db.insert("admins", {
       username: "admin",

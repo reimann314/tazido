@@ -1,6 +1,18 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
+const counterValidator = v.object({
+  totalUsers: v.number(),
+  totalStudents: v.number(),
+  totalCompanies: v.number(),
+  verifiedUsers: v.number(),
+  verifiedCompanies: v.number(),
+  totalJobs: v.number(),
+  openJobs: v.number(),
+  totalApplications: v.number(),
+  pendingApplications: v.number(),
+});
+
 export default defineSchema({
   users: defineTable({
     role: v.union(v.literal("student"), v.literal("company")),
@@ -104,4 +116,6 @@ export default defineSchema({
     .index("by_student", ["studentId"])
     .index("by_job", ["jobId"])
     .index("by_student_and_job", ["studentId", "jobId"]),
+
+  stats: defineTable(counterValidator),
 });

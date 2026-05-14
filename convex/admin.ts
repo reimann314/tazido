@@ -5,12 +5,77 @@ import type { Id } from "./_generated/dataModel";
 
 const SESSION_TTL_MS = 8 * 60 * 60 * 1000;
 
+const HASH_ALGORITHM = "pbkdf2-sha256";
+const HASH_ITERATIONS = 100_000;
+const HASH_KEY_LENGTH = 64;
+const SALT_LENGTH = 16;
+
+function encodeBase64(buf: ArrayBuffer | Uint8Array): string {
+  const bytes = buf instanceof Uint8Array ? buf : new Uint8Array(buf);
+  return btoa(String.fromCharCode(...bytes));
+}
+
+function decodeBase64(str: string): Uint8Array {
+  return Uint8Array.from(atob(str), (c) => c.charCodeAt(0));
+}
+
 async function hashPassword(password: string): Promise<string> {
-  const data = new TextEncoder().encode(password + "::tazid-admin::v1");
-  const buf = await crypto.subtle.digest("SHA-256", data);
-  return Array.from(new Uint8Array(buf))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
+  const salt = crypto.getRandomValues(new Uint8Array(SALT_LENGTH));
+  const keyMaterial = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(password),
+    { name: "PBKDF2" },
+    false,
+    ["deriveBits"],
+  );
+  const hash = await crypto.subtle.deriveBits(
+    { name: "PBKDF2", salt, iterations: HASH_ITERATIONS, hash: "SHA-256" },
+    keyMaterial,
+    HASH_KEY_LENGTH * 8,
+  );
+  return `$${HASH_ALGORITHM}$${HASH_ITERATIONS}$${encodeBase64(salt)}$${
+    encodeBase64(hash)
+  }`;
+}
+
+function isOldFormat(storedHash: string): boolean {
+  return !storedHash.startsWith("$");
+}
+
+async function verifyPassword(
+  password: string,
+  storedHash: string,
+): Promise<boolean> {
+  if (isOldFormat(storedHash)) {
+    const data = new TextEncoder().encode(password + "::tazid-admin::v1");
+    const buf = await crypto.subtle.digest("SHA-256", data);
+    const computed = Array.from(new Uint8Array(buf))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+    return computed === storedHash;
+  }
+  const parts = storedHash.split("$");
+  if (parts.length !== 5 || parts[1] !== HASH_ALGORITHM) return false;
+  const iterations = parseInt(parts[2], 10);
+  const salt = decodeBase64(parts[3]);
+  const expectedHash = decodeBase64(parts[4]);
+  const keyMaterial = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(password),
+    { name: "PBKDF2" },
+    false,
+    ["deriveBits"],
+  );
+  const hash = await crypto.subtle.deriveBits(
+    { name: "PBKDF2", salt: salt.buffer as ArrayBuffer, iterations, hash: "SHA-256" },
+    keyMaterial,
+    expectedHash.length * 8,
+  );
+  const hashBytes = new Uint8Array(hash);
+  return (
+    hashBytes.length === expectedHash.length &&
+    hashBytes.every((b, i) => b === expectedHash[i])
+  );
 }
 
 function randomToken(): string {
@@ -40,6 +105,13 @@ export const _createAdminSession = internalMutation({
   },
 });
 
+export const _updateAdmin = internalMutation({
+  args: { adminId: v.id("admins"), passwordHash: v.string() },
+  handler: async (ctx, { adminId, passwordHash }) => {
+    await ctx.db.patch(adminId, { passwordHash });
+  },
+});
+
 // ---------- Public: Auth ----------
 
 export const adminLogin = action({
@@ -49,8 +121,17 @@ export const adminLogin = action({
     const admin = await ctx.runQuery(internal.admin._getAdminByUsername, { username });
     if (!admin) throw new Error("اسم المستخدم أو كلمة المرور غير صحيحة");
 
-    const hash = await hashPassword(args.password);
-    if (hash !== admin.passwordHash) throw new Error("اسم المستخدم أو كلمة المرور غير صحيحة");
+    const matched = await verifyPassword(args.password, admin.passwordHash);
+    if (!matched) throw new Error("اسم المستخدم أو كلمة المرور غير صحيحة");
+
+    // Upgrade old-format password hash
+    if (isOldFormat(admin.passwordHash)) {
+      const newHash = await hashPassword(args.password);
+      await ctx.runMutation(internal.admin._updateAdmin, {
+        adminId: admin._id,
+        passwordHash: newHash,
+      });
+    }
 
     const token = randomToken();
     await ctx.runMutation(internal.admin._createAdminSession, {
@@ -73,8 +154,7 @@ export const adminMe = query({
     if (!session || session.expiresAt < Date.now()) return null;
     const admin = await ctx.db.get(session.adminId);
     if (!admin) return null;
-    const { passwordHash: _ph, ...safe } = admin;
-    return safe;
+    return { ...admin, passwordHash: undefined };
   },
 });
 
@@ -100,27 +180,17 @@ export const getDashboardStats = query({
       .unique();
     if (!session || session.expiresAt < Date.now()) return null;
 
-    const allUsers = await ctx.db.query("users").collect();
-    const allJobs = await ctx.db.query("jobs").collect();
-    const allApps = await ctx.db.query("applications").collect();
-
-    const students = allUsers.filter((u) => u.role === "student");
-    const companies = allUsers.filter((u) => u.role === "company");
-    const verifiedUsers = allUsers.filter((u) => u.emailVerified === true);
-    const verifiedCompanies = allUsers.filter((u) => u.role === "company" && u.verified === true);
-    const openJobs = allJobs.filter((j) => j.status === "open");
-    const pendingApps = allApps.filter((a) => a.status === "pending");
-
-    return {
-      totalUsers: allUsers.length,
-      totalStudents: students.length,
-      totalCompanies: companies.length,
-      verifiedUsers: verifiedUsers.length,
-      verifiedCompanies: verifiedCompanies.length,
-      totalJobs: allJobs.length,
-      openJobs: openJobs.length,
-      totalApplications: allApps.length,
-      pendingApplications: pendingApps.length,
+    const all = await ctx.db.query("stats").collect();
+    return all[0] ?? {
+      totalUsers: 0,
+      totalStudents: 0,
+      totalCompanies: 0,
+      verifiedUsers: 0,
+      verifiedCompanies: 0,
+      totalJobs: 0,
+      openJobs: 0,
+      totalApplications: 0,
+      pendingApplications: 0,
     };
   },
 });
@@ -140,7 +210,7 @@ export const getUsers = query({
       .unique();
     if (!session || session.expiresAt < Date.now()) return null;
 
-    let users = await ctx.db.query("users").collect();
+    let users = await ctx.db.query("users").take(200);
 
     if (role) users = users.filter((u) => u.role === role);
     if (search) {
@@ -154,7 +224,7 @@ export const getUsers = query({
     }
 
     return users
-      .map(({ passwordHash: _ph, ...u }) => u)
+      .map((u) => ({ ...u, passwordHash: undefined }))
       .sort((a, b) => b._creationTime - a._creationTime);
   },
 });
@@ -170,8 +240,7 @@ export const getUserById = query({
 
     const user = await ctx.db.get(userId);
     if (!user) return null;
-    const { passwordHash: _ph, ...safe } = user;
-    return safe;
+    return { ...user, passwordHash: undefined };
   },
 });
 
@@ -210,9 +279,18 @@ export const updateUser = mutation({
       .unique();
     if (!session || session.expiresAt < Date.now()) throw new Error("Unauthorized");
 
-    const clean = Object.fromEntries(Object.entries(updates).filter(([_, v]) => v !== undefined));
+    const clean = Object.fromEntries(
+      Object.entries(updates).filter((entry) => entry[1] !== undefined),
+    );
     if (Object.keys(clean).length > 0) {
       await ctx.db.patch(userId, clean);
+    }
+    // Update counter when verification status changes
+    if (updates.verified !== undefined) {
+      await ctx.runMutation(internal.stats._updateVerifiedCounter, {
+        userId,
+        verified: updates.verified,
+      });
     }
   },
 });
@@ -235,6 +313,8 @@ export const deleteUser = mutation({
       .collect();
     for (const s of sessions) await ctx.db.delete(s._id);
 
+    let removedJobs = 0;
+    let removedApps = 0;
     if (user.role === "company") {
       const jobs = await ctx.db
         .query("jobs")
@@ -245,8 +325,10 @@ export const deleteUser = mutation({
           .query("applications")
           .withIndex("by_job", (q) => q.eq("jobId", job._id))
           .collect();
+        removedApps += apps.length;
         for (const app of apps) await ctx.db.delete(app._id);
         await ctx.db.delete(job._id);
+        removedJobs++;
       }
     }
 
@@ -255,10 +337,24 @@ export const deleteUser = mutation({
         .query("applications")
         .withIndex("by_student", (q) => q.eq("studentId", userId))
         .collect();
+      removedApps = apps.length;
       for (const app of apps) await ctx.db.delete(app._id);
     }
 
     await ctx.db.delete(userId);
+
+    // Update aggregate counters
+    await ctx.runMutation(internal.stats._updateUserCounter, {
+      op: "decrement",
+      role: user.role,
+      verified: user.verified ?? false,
+    });
+    for (let i = 0; i < removedJobs; i++) {
+      await ctx.runMutation(internal.stats._updateJobCounter, { op: "decrement" });
+    }
+    for (let i = 0; i < removedApps; i++) {
+      await ctx.runMutation(internal.stats._updateApplicationCounter, { op: "decrement" });
+    }
   },
 });
 
@@ -273,7 +369,7 @@ export const getJobs = query({
       .unique();
     if (!session || session.expiresAt < Date.now()) return null;
 
-    let jobs = await ctx.db.query("jobs").collect();
+    let jobs = await ctx.db.query("jobs").take(200);
     if (status) jobs = jobs.filter((j) => j.status === status);
     return jobs.sort((a, b) => b._creationTime - a._creationTime);
   },
@@ -323,7 +419,7 @@ export const getApplications = query({
       .unique();
     if (!session || session.expiresAt < Date.now()) return null;
 
-    let apps = await ctx.db.query("applications").collect();
+    let apps = await ctx.db.query("applications").take(200);
     if (status) apps = apps.filter((a) => a.status === status);
     return apps.sort((a, b) => b._creationTime - a._creationTime);
   },

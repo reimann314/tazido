@@ -2,6 +2,7 @@ import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { getAdminToken } from "../../lib/admin-auth";
 import { Users, Briefcase, FileText, Shield, UserCheck, Building2, GraduationCap } from "lucide-react";
+import { StatsCardSkeleton } from "../../components/LoadingSkeletons";
 
 export default function AdminDashboard() {
   const token = getAdminToken() ?? undefined;
@@ -9,8 +10,10 @@ export default function AdminDashboard() {
 
   if (!stats) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <div className="w-8 h-8 border-2 border-brand border-t-transparent rounded-full animate-spin" />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {Array.from({ length: 9 }).map((_, i) => (
+          <StatsCardSkeleton key={i} />
+        ))}
       </div>
     );
   }

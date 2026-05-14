@@ -3,6 +3,7 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { getToken } from "../../lib/auth";
 import { StatusBadge } from "../../components/StatusBadge";
+import { TableSkeleton } from "../../components/LoadingSkeletons";
 
 export default function CandidatesPage() {
   const token = getToken() ?? undefined;
@@ -12,7 +13,7 @@ export default function CandidatesPage() {
   const [selectedJob, setSelectedJob] = useState("");
 
   if (!jobs || !allApps) {
-    return <p className="text-text-secondary">جاري التحميل...</p>;
+    return <TableSkeleton rows={4} />;
   }
 
   const filtered = selectedJob

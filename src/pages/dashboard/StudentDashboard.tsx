@@ -6,15 +6,15 @@ import {
   JOB_TYPE_LABELS,
   StatusBadge,
 } from "../../components/StatusBadge";
+import { CardSkeleton, TableSkeleton } from "../../components/LoadingSkeletons";
 
 type Me = {
   name?: string;
-  companyName?: string;
 };
 
 export default function StudentDashboard({ me }: { me: Me }) {
   const token = getToken() ?? undefined;
-  const recommended = useQuery(api.jobs.list, { limit: 6 });
+  const recommended = useQuery(api.jobs.list, { paginationOpts: { numItems: 6, cursor: null } });
   const myApps = useQuery(
     api.applications.listByStudent,
     token ? { token } : "skip",
@@ -33,12 +33,16 @@ export default function StudentDashboard({ me }: { me: Me }) {
           </Link>
         </div>
         {recommended === undefined ? (
-          <p className="text-text-secondary">جاري التحميل...</p>
-        ) : recommended.length === 0 ? (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <CardSkeleton key={i} />
+            ))}
+          </div>
+        ) : recommended.page.length === 0 ? (
           <p className="text-text-secondary">لا توجد وظائف حالياً.</p>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {recommended.map((job) => (
+            {recommended.page.map((job) => (
               <Link
                 key={job._id}
                 to={`/jobs/${job._id}`}
@@ -60,12 +64,12 @@ export default function StudentDashboard({ me }: { me: Me }) {
 
       <section>
         <h2 className="text-h3 mb-4">طلباتي</h2>
-        <div className="bg-white rounded-2xl border border-border-light overflow-hidden">
-          {myApps === undefined ? (
-            <p className="p-6 text-text-secondary">جاري التحميل...</p>
-          ) : myApps.length === 0 ? (
-            <p className="p-6 text-text-secondary">لم تتقدّم لأي وظيفة بعد.</p>
-          ) : (
+        {myApps === undefined ? (
+          <TableSkeleton rows={3} />
+        ) : myApps.length === 0 ? (
+          <p className="text-text-secondary p-6 bg-white rounded-2xl border border-border-light">لم تتقدّم لأي وظيفة بعد.</p>
+        ) : (
+          <div className="bg-white rounded-2xl border border-border-light overflow-hidden">
             <table className="w-full text-sm">
               <thead className="bg-surface text-text-secondary">
                 <tr>
@@ -94,8 +98,8 @@ export default function StudentDashboard({ me }: { me: Me }) {
                 ))}
               </tbody>
             </table>
-          )}
-        </div>
+          </div>
+        )}
       </section>
     </div>
   );

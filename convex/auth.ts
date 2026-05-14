@@ -5,12 +5,86 @@ import type { Id } from "./_generated/dataModel";
 
 const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
+// ─── Password hashing (PBKDF2) ───
+
+const HASH_ALGORITHM = "pbkdf2-sha256";
+const HASH_ITERATIONS = 100_000;
+const HASH_KEY_LENGTH = 64;
+const SALT_LENGTH = 16;
+
+function encodeBase64(buf: ArrayBuffer | Uint8Array): string {
+  const bytes = buf instanceof Uint8Array ? buf : new Uint8Array(buf);
+  return btoa(String.fromCharCode(...bytes));
+}
+
+function decodeBase64(str: string): Uint8Array {
+  return Uint8Array.from(atob(str), (c) => c.charCodeAt(0));
+}
+
 async function hashPassword(password: string): Promise<string> {
-  const data = new TextEncoder().encode(password + "::tazid::v1");
-  const buf = await crypto.subtle.digest("SHA-256", data);
-  return Array.from(new Uint8Array(buf))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
+  const salt = crypto.getRandomValues(new Uint8Array(SALT_LENGTH));
+  const keyMaterial = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(password),
+    { name: "PBKDF2" },
+    false,
+    ["deriveBits"],
+  );
+  const hash = await crypto.subtle.deriveBits(
+    {
+      name: "PBKDF2",
+      salt,
+      iterations: HASH_ITERATIONS,
+      hash: "SHA-256",
+    },
+    keyMaterial,
+    HASH_KEY_LENGTH * 8,
+  );
+  return `$${HASH_ALGORITHM}$${HASH_ITERATIONS}$${encodeBase64(salt)}$${
+    encodeBase64(hash)
+  }`;
+}
+
+function isOldFormat(storedHash: string): boolean {
+  return !storedHash.startsWith("$");
+}
+
+async function verifyPassword(
+  password: string,
+  storedHash: string,
+): Promise<{ matched: boolean; needsUpgrade: boolean }> {
+  if (isOldFormat(storedHash)) {
+    const data = new TextEncoder().encode(password + "::tazid::v1");
+    const buf = await crypto.subtle.digest("SHA-256", data);
+    const computed = Array.from(new Uint8Array(buf))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+    return { matched: computed === storedHash, needsUpgrade: computed === storedHash };
+  }
+  const parts = storedHash.split("$");
+  if (parts.length !== 5 || parts[1] !== HASH_ALGORITHM) {
+    return { matched: false, needsUpgrade: false };
+  }
+  const iterations = parseInt(parts[2], 10);
+  const salt = decodeBase64(parts[3]);
+  const expectedHash = decodeBase64(parts[4]);
+  const keyMaterial = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(password),
+    { name: "PBKDF2" },
+    false,
+    ["deriveBits"],
+  );
+  const hash = await crypto.subtle.deriveBits(
+    { name: "PBKDF2", salt: salt.buffer as ArrayBuffer, iterations, hash: "SHA-256" },
+    keyMaterial,
+    expectedHash.length * 8,
+  );
+  const hashBytes = new Uint8Array(hash);
+  const matched =
+    hashBytes.length === expectedHash.length &&
+    hashBytes.every((b, i) => b === expectedHash[i]);
+  return { matched, needsUpgrade: false };
 }
 
 function randomToken(): string {
@@ -104,7 +178,7 @@ export const _insertUser = internalMutation({
   },
   handler: async (ctx, args) => {
     const clean = Object.fromEntries(
-      Object.entries(args).filter(([_, v]) => v !== undefined),
+      Object.entries(args).filter((entry) => entry[1] !== undefined),
     ) as typeof args;
     return await ctx.db.insert("users", clean);
   },
@@ -281,6 +355,12 @@ export const signUp = action({
       console.error("Failed to send welcome email", err);
     }
 
+    // Update aggregate counters
+    await ctx.runMutation(internal.stats._updateUserCounter, {
+      op: "increment",
+      role: args.role,
+    });
+
     return { token: sessionToken, userId };
   },
 });
@@ -301,10 +381,22 @@ export const signIn = action({
       await ctx.runMutation(internal.auth._recordLoginAttempt, { email });
       throw new Error("البريد أو كلمة المرور غير صحيحة. تحقّق من بياناتك وحاول مجدداً.");
     }
-    const hash = await hashPassword(args.password);
-    if (hash !== user.passwordHash) {
+    const { matched, needsUpgrade } = await verifyPassword(
+      args.password,
+      user.passwordHash,
+    );
+    if (!matched) {
       await ctx.runMutation(internal.auth._recordLoginAttempt, { email });
       throw new Error("البريد أو كلمة المرور غير صحيحة. تحقّق من بياناتك وحاول مجدداً.");
+    }
+
+    // Upgrade old-format password hash on successful login
+    if (needsUpgrade) {
+      const newHash = await hashPassword(args.password);
+      await ctx.runMutation(internal.auth._updateUser, {
+        userId: user._id,
+        updates: { passwordHash: newHash },
+      });
     }
 
     // Clear rate limit on success
@@ -354,8 +446,7 @@ export const me = query({
     if (!session || session.expiresAt < Date.now()) return null;
     const user = await ctx.db.get(session.userId);
     if (!user) return null;
-    const { passwordHash: _ph, ...safe } = user;
-    return safe;
+    return { ...user, passwordHash: undefined };
   },
 });
 
