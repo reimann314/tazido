@@ -30,63 +30,59 @@ function ScrollToTop() {
   return null;
 }
 
-function AppLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      <div className="flex-1">{children}</div>
-      <Footer />
-      <CookieConsent />
-    </div>
-  );
-}
-
 function App() {
   return (
     <BrowserRouter>
       <ScrollToTop />
+      <MainRoutes />
+    </BrowserRouter>
+  );
+}
+
+function MainRoutes() {
+  const { pathname } = useLocation();
+  const isAdmin = pathname.startsWith("/admin");
+
+  if (isAdmin) {
+    return (
       <Routes>
         <Route path="/admin/login" element={<AdminLogin />} />
-        <Route
-          path="/admin"
-          element={
-            <AdminGuard>
-              <AdminPage />
-            </AdminGuard>
-          }
-        />
-        <Route
-          path="/*"
-          element={
-            <AppLayout>
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/how-it-works" element={<HowItWorks />} />
-                <Route path="/for-companies" element={<ForCompanies />} />
-                <Route path="/for-talent" element={<ForTalent />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/signup" element={<RedirectIfAuth><Auth /></RedirectIfAuth>} />
-                <Route path="/login" element={<RedirectIfAuth><Auth /></RedirectIfAuth>} />
-                <Route path="/jobs" element={<Jobs />} />
-                <Route path="/jobs/:id" element={<JobDetail />} />
-                <Route path="/verify-email" element={<VerifyEmail />} />
-                <Route path="/reset-password" element={<ResetPassword />} />
-                <Route path="/terms" element={<Terms />} />
-                <Route path="/privacy" element={<Privacy />} />
-                <Route
-                  path="/dashboard"
-                  element={
-                    <RequireAuth>
-                      <Dashboard />
-                    </RequireAuth>
-                  }
-                />
-              </Routes>
-            </AppLayout>
-          }
-        />
+        <Route path="/admin" element={<AdminGuard><AdminPage /></AdminGuard>} />
       </Routes>
-    </BrowserRouter>
+    );
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
+      <div className="flex-1">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/how-it-works" element={<HowItWorks />} />
+          <Route path="/for-companies" element={<ForCompanies />} />
+          <Route path="/for-talent" element={<ForTalent />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/signup" element={<RedirectIfAuth><Auth /></RedirectIfAuth>} />
+          <Route path="/login" element={<RedirectIfAuth><Auth /></RedirectIfAuth>} />
+          <Route path="/jobs" element={<Jobs />} />
+          <Route path="/jobs/:id" element={<JobDetail />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route
+            path="/dashboard"
+            element={
+              <RequireAuth>
+                <Dashboard />
+              </RequireAuth>
+            }
+          />
+        </Routes>
+      </div>
+      <Footer />
+      <CookieConsent />
+    </div>
   );
 }
 

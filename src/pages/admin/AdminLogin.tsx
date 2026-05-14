@@ -2,21 +2,15 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAction } from "convex/react";
 import { api } from "../../../convex/_generated/api";
-import { setAdminToken, useAdmin } from "../../lib/admin-auth";
+import { setAdminToken } from "../../lib/admin-auth";
 
 export default function AdminLogin() {
-  const admin = useAdmin();
   const navigate = useNavigate();
   const login = useAction(api.admin.adminLogin);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
-
-  if (admin) {
-    navigate("/admin", { replace: true });
-    return null;
-  }
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,7 +48,7 @@ export default function AdminLogin() {
               onChange={(e) => setUsername(e.target.value)}
               required
               autoFocus
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:outline-none focus:border-brand focus:bg-white transition-colors text-sm"
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:outline-none focus:border-brand focus:bg-white text-sm"
             />
           </label>
           <label className="block">
@@ -64,7 +58,7 @@ export default function AdminLogin() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:outline-none focus:border-brand focus:bg-white transition-colors text-sm"
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:outline-none focus:border-brand focus:bg-white text-sm"
             />
           </label>
           <button
