@@ -37,6 +37,26 @@ export default function Footer() {
             </ul>
           </div>
 
+          {/* Legal */}
+          <div className="space-y-4">
+            <h4 className="text-white font-semibold text-sm">القانونية</h4>
+            <ul className="space-y-3">
+              {[
+                { label: "شروط الاستخدام", href: "/terms" },
+                { label: "سياسة الخصوصية", href: "/privacy" },
+              ].map((link) => (
+                <li key={link.href}>
+                  <Link
+                    to={link.href}
+                    className="text-text-muted hover:text-white text-sm transition-colors duration-200"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
           {/* Contact */}
           <div className="space-y-4">
             <h4 className="text-white font-semibold text-sm">تواصل معنا</h4>

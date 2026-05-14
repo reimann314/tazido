@@ -29,6 +29,10 @@ export default defineSchema({
     zakatCertificate: v.optional(v.string()),
     taxCertificate: v.optional(v.string()),
     contactNumber: v.optional(v.string()),
+    emailVerified: v.optional(v.boolean()),
+    verificationToken: v.optional(v.string()),
+    resetToken: v.optional(v.string()),
+    resetTokenExpires: v.optional(v.number()),
   }).index("by_email", ["email"]),
 
   sessions: defineTable({

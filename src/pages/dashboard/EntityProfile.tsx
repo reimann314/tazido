@@ -65,10 +65,10 @@ export default function EntityProfile() {
           return (
             <div
               key={i}
-              className="group bg-white rounded-2xl border border-border-light p-6 md:p-7 hover:border-brand/25 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+              className="bg-white rounded-2xl border border-border-light p-6 md:p-7 hover:border-brand/25 hover:shadow-lg"
             >
               <div className="flex items-start gap-4">
-                <span className="w-14 h-14 rounded-2xl bg-brand/[0.06] flex items-center justify-center text-brand shrink-0 group-hover:bg-brand/[0.10] group-hover:scale-105 transition-all duration-300">
+                <span className="w-14 h-14 rounded-2xl bg-brand/[0.06] flex items-center justify-center text-brand shrink-0">
                   <Icon size={28} />
                 </span>
                 <div className="flex-1 min-w-0">

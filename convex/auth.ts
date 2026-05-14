@@ -33,6 +33,13 @@ export const _getUserByEmail = internalQuery({
   },
 });
 
+export const _getUserById = internalQuery({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }) => {
+    return await ctx.db.get(userId);
+  },
+});
+
 export const _insertUser = internalMutation({
   args: {
     role: v.union(v.literal("student"), v.literal("company")),
@@ -74,6 +81,22 @@ export const _createSession = internalMutation({
   args: { userId: v.id("users"), token: v.string(), expiresAt: v.number() },
   handler: async (ctx, args) => {
     await ctx.db.insert("sessions", args);
+  },
+});
+
+export const _updateUser = internalMutation({
+  args: {
+    userId: v.id("users"),
+    updates: v.object({
+      emailVerified: v.optional(v.boolean()),
+      verificationToken: v.optional(v.string()),
+      resetToken: v.optional(v.string()),
+      resetTokenExpires: v.optional(v.number()),
+      passwordHash: v.optional(v.string()),
+    }),
+  },
+  handler: async (ctx, { userId, updates }) => {
+    await ctx.db.patch(userId, updates);
   },
 });
 
@@ -152,14 +175,20 @@ export const signUp = action({
       contactNumber: args.contactNumber,
     });
 
-    const token = randomToken();
+    const verificationToken = randomToken();
+    await ctx.runMutation(internal.auth._updateUser, {
+      userId,
+      updates: { verificationToken },
+    });
+
+    const sessionToken = randomToken();
     await ctx.runMutation(internal.auth._createSession, {
       userId,
-      token,
+      token: sessionToken,
       expiresAt: Date.now() + SESSION_TTL_MS,
     });
 
-    // Send welcome email via Resend
+    // Send emails via Resend
     try {
       const apiKey = process.env.RESEND_API_KEY;
       const from = process.env.RESEND_FROM ?? "Tazid <onboarding@resend.dev>";
@@ -174,7 +203,7 @@ export const signUp = action({
           body: JSON.stringify({
             from,
             to: email,
-            subject: "مرحباً بك في تزيد",
+            subject: "مرحباً بك في تزيد – تأكيد البريد الإلكتروني",
             html: `<!DOCTYPE html>
 <html dir="rtl">
 <head><meta charset="utf-8"></head>
@@ -189,17 +218,20 @@ export const signUp = action({
       <td style="padding: 30px;">
         <p style="font-size: 18px; color: #333;">مرحباً ${displayName || "عزيزي المستخدم"}،</p>
         <p style="font-size: 15px; color: #666; line-height: 1.8;">
-          نشكرك على التسجيل في منصة تزيد. نحن متحمسون لانضمامك إلينا!
-        </p>
-        <p style="font-size: 15px; color: #666; line-height: 1.8;">
-          ${args.role === "company" ? "يمكنك الآن استكمال ملف منشئتك والبدء في رحلة التوظيف." : "يمكنك الآن استكمال ملفك الشخصي والبدء في رحلة البحث عن الفرص."}
+          نشكرك على التسجيل في منصة تزيد. يرجى تأكيد بريدك الإلكتروني لتفعيل حسابك بالكامل.
         </p>
         <div style="text-align: center; margin: 30px 0;">
-          <a href="https://tazid.co/dashboard"
-             style="display: inline-block; padding: 12px 32px; background: linear-gradient(135deg, #1a3a3a, #2d6a5e); color: white; text-decoration: none; border-radius: 8px; font-size: 16px;">
-            الذهاب إلى لوحة التحكم
+          <a href="https://tazid.co/verify-email?token=${verificationToken}&userId=${userId}"
+             style="display: inline-block; padding: 14px 36px; background: linear-gradient(135deg, #1a3a3a, #2d6a5e); color: white; text-decoration: none; border-radius: 8px; font-size: 16px;">
+            تأكيد البريد الإلكتروني
           </a>
         </div>
+        <p style="font-size: 14px; color: #999; line-height: 1.8;">
+          إذا لم تتمكن من الضغط على الزر، انسخ الرابط التالي والصقه في المتصفح:<br>
+          <span style="color: #1a3a3a; direction: ltr; display: inline-block; word-break: break-all; font-size: 13px;">
+            https://tazid.co/verify-email?token=${verificationToken}&userId=${userId}
+          </span>
+        </p>
         <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
         <p style="font-size: 13px; color: #999; text-align: center;">
           © 2026 تزيد | جميع الحقوق محفوظة
@@ -216,7 +248,7 @@ export const signUp = action({
       console.error("Failed to send welcome email", err);
     }
 
-    return { token, userId };
+    return { token: sessionToken, userId };
   },
 });
 
@@ -231,6 +263,18 @@ export const signIn = action({
     const hash = await hashPassword(args.password);
     if (hash !== user.passwordHash) {
       throw new Error("البريد أو كلمة المرور غير صحيحة. تحقّق من بياناتك وحاول مجدداً.");
+    }
+
+    if (user.emailVerified !== true) {
+      // Auto-verify existing users who signed up before email verification existed
+      if (user.emailVerified === undefined && !user.verificationToken) {
+        await ctx.runMutation(internal.auth._updateUser, {
+          userId: user._id,
+          updates: { emailVerified: true },
+        });
+      } else {
+        throw new Error("يرجى تأكيد بريدك الإلكتروني أولاً. تحقق من صندوق الوارد أو اضغط على إعادة إرسال رابط التفعيل.");
+      }
     }
 
     const token = randomToken();
@@ -267,5 +311,179 @@ export const me = query({
     if (!user) return null;
     const { passwordHash: _ph, ...safe } = user;
     return safe;
+  },
+});
+
+export const verifyEmail = action({
+  args: { token: v.string(), userId: v.id("users") },
+  handler: async (ctx, { token, userId }) => {
+    const user = await ctx.runQuery(internal.auth._getUserById, { userId });
+    if (!user) throw new Error("المستخدم غير موجود.");
+    if (user.verificationToken !== token) throw new Error("رابط التأكيد غير صالح أو منتهي الصلاحية.");
+    await ctx.runMutation(internal.auth._updateUser, {
+      userId,
+      updates: { emailVerified: true, verificationToken: undefined },
+    });
+    return true;
+  },
+});
+
+export const resendVerification = action({
+  args: { email: v.string() },
+  handler: async (ctx, args) => {
+    const email = args.email.trim().toLowerCase();
+    const user = await ctx.runQuery(internal.auth._getUserByEmail, { email });
+    if (!user) throw new Error("البريد الإلكتروني غير مسجل لدينا.");
+    if (user.emailVerified) throw new Error("البريد الإلكتروني مؤكد بالفعل.");
+
+    const newToken = randomToken();
+    await ctx.runMutation(internal.auth._updateUser, {
+      userId: user._id,
+      updates: { verificationToken: newToken },
+    });
+
+    const apiKey = process.env.RESEND_API_KEY;
+    const from = process.env.RESEND_FROM ?? "Tazid <onboarding@resend.dev>";
+    const displayName = user.role === "company" ? user.companyName : user.name;
+    if (apiKey) {
+      await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from,
+          to: email,
+          subject: "تأكيد البريد الإلكتروني – تزيد",
+          html: `<!DOCTYPE html>
+<html dir="rtl">
+<head><meta charset="utf-8"></head>
+<body style="font-family: Arial, sans-serif; background: #f5f5f5; padding: 40px 20px;">
+  <table align="center" style="max-width: 600px; width: 100%; background: white; border-radius: 16px; overflow: hidden;">
+    <tr>
+      <td style="background: linear-gradient(135deg, #1a3a3a, #2d6a5e); padding: 30px; text-align: center;">
+        <h1 style="color: white; margin: 0; font-size: 28px;">تأكيد البريد الإلكتروني</h1>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding: 30px;">
+        <p style="font-size: 18px; color: #333;">مرحباً ${displayName || "عزيزي المستخدم"}،</p>
+        <p style="font-size: 15px; color: #666; line-height: 1.8;">
+          نرسل لك رابط تأكيد جديد. اضغط على الزر أدناه لتأكيد بريدك الإلكتروني.
+        </p>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="https://tazid.co/verify-email?token=${newToken}&userId=${user._id}"
+             style="display: inline-block; padding: 14px 36px; background: linear-gradient(135deg, #1a3a3a, #2d6a5e); color: white; text-decoration: none; border-radius: 8px; font-size: 16px;">
+            تأكيد البريد الإلكتروني
+          </a>
+        </div>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+        <p style="font-size: 13px; color: #999; text-align: center;">
+          © 2026 تزيد | جميع الحقوق محفوظة
+        </p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`,
+        }),
+      });
+    }
+  },
+});
+
+export const requestPasswordReset = action({
+  args: { email: v.string() },
+  handler: async (ctx, args) => {
+    const email = args.email.trim().toLowerCase();
+    const user = await ctx.runQuery(internal.auth._getUserByEmail, { email });
+    if (!user) {
+      // Don't reveal whether the email exists
+      return;
+    }
+
+    const resetToken = randomToken();
+    await ctx.runMutation(internal.auth._updateUser, {
+      userId: user._id,
+      updates: {
+        resetToken,
+        resetTokenExpires: Date.now() + 60 * 60 * 1000, // 1 hour
+      },
+    });
+
+    const apiKey = process.env.RESEND_API_KEY;
+    const from = process.env.RESEND_FROM ?? "Tazid <onboarding@resend.dev>";
+    const displayName = user.role === "company" ? user.companyName : user.name;
+    if (apiKey) {
+      await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from,
+          to: email,
+          subject: "إعادة تعيين كلمة المرور – تزيد",
+          html: `<!DOCTYPE html>
+<html dir="rtl">
+<head><meta charset="utf-8"></head>
+<body style="font-family: Arial, sans-serif; background: #f5f5f5; padding: 40px 20px;">
+  <table align="center" style="max-width: 600px; width: 100%; background: white; border-radius: 16px; overflow: hidden;">
+    <tr>
+      <td style="background: linear-gradient(135deg, #1a3a3a, #2d6a5e); padding: 30px; text-align: center;">
+        <h1 style="color: white; margin: 0; font-size: 28px;">إعادة تعيين كلمة المرور</h1>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding: 30px;">
+        <p style="font-size: 18px; color: #333;">مرحباً ${displayName || "عزيزي المستخدم"}،</p>
+        <p style="font-size: 15px; color: #666; line-height: 1.8;">
+          تلقينا طلباً لإعادة تعيين كلمة المرور الخاصة بحسابك في تزيد. الرابط صالح لمدة ساعة واحدة.
+        </p>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="https://tazid.co/reset-password?token=${resetToken}&userId=${user._id}"
+             style="display: inline-block; padding: 14px 36px; background: linear-gradient(135deg, #1a3a3a, #2d6a5e); color: white; text-decoration: none; border-radius: 8px; font-size: 16px;">
+            إعادة تعيين كلمة المرور
+          </a>
+        </div>
+        <p style="font-size: 14px; color: #999; line-height: 1.8;">
+          إذا لم تقم بطلب إعادة التعيين، تجاهل هذا البريد.
+        </p>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+        <p style="font-size: 13px; color: #999; text-align: center;">
+          © 2026 تزيد | جميع الحقوق محفوظة
+        </p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`,
+        }),
+      });
+    }
+  },
+});
+
+export const resetPassword = action({
+  args: { token: v.string(), userId: v.id("users"), newPassword: v.string() },
+  handler: async (ctx, { token, userId, newPassword }) => {
+    if (newPassword.length < 6) {
+      throw new Error("كلمة المرور قصيرة، يجب أن تحتوي على ٦ أحرف على الأقل");
+    }
+
+    const user = await ctx.runQuery(internal.auth._getUserById, { userId });
+    if (!user) throw new Error("المستخدم غير موجود.");
+    if (user.resetToken !== token) throw new Error("الرابط غير صالح.");
+    if (!user.resetTokenExpires || user.resetTokenExpires < Date.now()) {
+      throw new Error("انتهت صلاحية الرابط. يرجى طلب رابط جديد.");
+    }
+
+    const passwordHash = await hashPassword(newPassword);
+    await ctx.runMutation(internal.auth._updateUser, {
+      userId,
+      updates: { passwordHash, resetToken: undefined, resetTokenExpires: undefined },
+    });
   },
 });

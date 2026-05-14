@@ -5,7 +5,7 @@ import { api } from "../../convex/_generated/api";
 import { setToken } from "../lib/auth";
 
 type Role = "student" | "company";
-type Mode = "login" | "signup";
+type Mode = "login" | "signup" | "forgot";
 type AcademicLevel = "" | "university" | "high-school";
 type EntityType = "" | "university" | "high-school" | "association" | "other";
 
@@ -27,6 +27,7 @@ export default function Auth() {
 
   const signUp = useAction(api.auth.signUp);
   const signIn = useAction(api.auth.signIn);
+  const requestPasswordReset = useAction(api.auth.requestPasswordReset);
 
   useEffect(() => {
     setMode(location.pathname.includes("login") ? "login" : "signup");
@@ -122,7 +123,9 @@ export default function Auth() {
           )}
 
           <h1 className="text-h2 mb-2">
-            {mode === "signup"
+            {mode === "forgot"
+              ? "استعادة كلمة المرور"
+              : mode === "signup"
               ? role === "student"
                 ? "صفحة تسجيل الطلاب"
                 : "سجّل شركتك في تزيد"
@@ -132,7 +135,9 @@ export default function Auth() {
             <p className="text-text-secondary mb-6 text-sm">ادخل بياناتك لمتابعة جلستك.</p>
           )}
 
-          {done ? (
+          {mode === "forgot" ? (
+            <ForgotPasswordForm onBack={() => { setMode("login"); setError(null); }} />
+          ) : done ? (
             <div className="bg-brand/5 border border-brand/20 rounded-2xl p-6 text-center">
               <div className="text-2xl mb-2">✅</div>
               <p className="font-medium mb-1">
@@ -169,6 +174,15 @@ export default function Auth() {
                 <div className="space-y-4">
                   <Field name="email" type="email" label="البريد الإلكتروني" required />
                   <Field name="password" type="password" label="كلمة المرور" required />
+                  <div className="text-left">
+                    <Link
+                      to="/login"
+                      onClick={() => setMode("forgot")}
+                      className="text-sm text-brand hover:text-brand-dark font-medium transition-colors"
+                    >
+                      نسيت كلمة المرور؟
+                    </Link>
+                  </div>
                 </div>
               )}
 
@@ -338,6 +352,72 @@ function TextAreaField({ name, label, required }: { name: string; label: string;
         className="w-full px-4 py-3 rounded-xl border border-border-light bg-surface focus:outline-none focus:border-brand focus:bg-white transition-colors resize-none"
       />
     </label>
+  );
+}
+
+function ForgotPasswordForm({ onBack }: { onBack: () => void }) {
+  const [email, setEmail] = useState("");
+  const [sent, setSent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const requestPasswordReset = useAction(api.auth.requestPasswordReset);
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setError(null);
+    try {
+      await requestPasswordReset({ email });
+      setSent(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "حدث خطأ");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (sent) {
+    return (
+      <div className="text-center py-8">
+        <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-green-100 flex items-center justify-center">
+          <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <h2 className="text-xl font-bold text-text-primary mb-3">تم إرسال رابط إعادة التعيين</h2>
+        <p className="text-text-secondary text-sm mb-6">
+          إذا كان البريد الإلكتروني مسجلاً لدينا، ستتلقى رابطاً لإعادة تعيين كلمة المرور.
+        </p>
+        <button onClick={onBack} className="text-brand font-medium hover:text-brand-dark transition-colors">
+          العودة إلى تسجيل الدخول
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={onSubmit} className="space-y-5">
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">{error}</div>
+      )}
+      <p className="text-text-secondary text-sm">أدخل بريدك الإلكتروني وسنرسل لك رابطاً لإعادة تعيين كلمة المرور.</p>
+      <label className="block">
+        <span className="block text-sm font-medium mb-1.5 text-text-primary">البريد الإلكتروني</span>
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          className="w-full px-4 py-3 rounded-xl border border-border-light bg-surface focus:outline-none focus:border-brand focus:bg-white transition-colors"
+        />
+      </label>
+      <button type="submit" disabled={submitting} className="btn-primary w-full disabled:opacity-60">
+        {submitting ? "جاري الإرسال..." : "إرسال رابط إعادة التعيين"}
+      </button>
+      <button type="button" onClick={onBack} className="block w-full text-center text-sm text-text-secondary hover:text-brand transition-colors py-2">
+        العودة إلى تسجيل الدخول
+      </button>
+    </form>
   );
 }
 

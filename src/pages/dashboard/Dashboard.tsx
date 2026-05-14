@@ -89,7 +89,7 @@ export default function Dashboard() {
               </p>
             </div>
           </div>
-          <button onClick={() => setSidebarOpen(false)} className="lg:hidden p-1 hover:bg-surface rounded-lg transition-colors">
+          <button onClick={() => setSidebarOpen(false)} className="lg:hidden p-1 hover:bg-surface rounded-lg">
             <X size={20} className="text-text-secondary" />
           </button>
         </div>
@@ -103,7 +103,8 @@ export default function Dashboard() {
               key={item.key}
               onClick={() => handleNavClick(item)}
               disabled={item.comingSoon}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-all relative group text-right ${
+              title={item.comingSoon ? COMING_SOON_MSG : undefined}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-right ${
                 isActive
                   ? "bg-brand text-white font-medium"
                   : "text-text-secondary hover:bg-surface hover:text-text-primary"
@@ -114,14 +115,9 @@ export default function Dashboard() {
               </span>
               <span className="truncate">{item.label}</span>
               {item.comingSoon && (
-                <>
-                  <span className="mr-auto text-[10px] bg-surface/50 text-text-muted px-2 py-0.5 rounded-full shrink-0">
-                    قريباً
-                  </span>
-                  <div className="absolute right-0 top-full mt-1 w-64 bg-white border border-border-light rounded-xl p-3 shadow-float text-xs text-text-secondary opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none">
-                    {COMING_SOON_MSG}
-                  </div>
-                </>
+                <span className="mr-auto text-[10px] bg-surface/50 text-text-muted px-2 py-0.5 rounded-full shrink-0">
+                  قريباً
+                </span>
               )}
             </button>
           );
@@ -133,7 +129,7 @@ export default function Dashboard() {
           <Link
             to="/jobs"
             onClick={() => setSidebarOpen(false)}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-text-secondary hover:bg-surface hover:text-text-primary transition-all"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-text-secondary hover:bg-surface hover:text-text-primary"
           >
             <span className="text-brand/70"><Briefcase size={20} /></span>
             <span>تصفح الوظائف</span>
@@ -141,7 +137,7 @@ export default function Dashboard() {
         )}
         <button
           onClick={handleBackToDashboard}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-text-secondary hover:bg-surface hover:text-text-primary transition-all"
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-text-secondary hover:bg-surface hover:text-text-primary"
         >
           <span className="text-brand/70"><Briefcase size={20} /></span>
           <span>{isStudent ? "الرئيسية" : "وظائفي"}</span>
@@ -151,7 +147,7 @@ export default function Dashboard() {
       <div className="p-4 border-t border-border-light">
         <a
           href="tel:0554899033"
-          className="flex items-center gap-3 w-full px-4 py-3 rounded-xl bg-red-50 text-red-700 text-sm font-medium hover:bg-red-100 transition-all"
+          className="flex items-center gap-3 w-full px-4 py-3 rounded-xl bg-red-50 text-red-700 text-sm font-medium hover:bg-red-100"
         >
           <span className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-600 shrink-0">
             <PhoneCall size={16} />
@@ -175,11 +171,9 @@ export default function Dashboard() {
         />
       )}
 
-      {/* Mobile sidebar drawer — slides from the right */}
+      {/* Mobile sidebar drawer */}
       <div
-        className={`fixed top-[72px] right-0 bottom-0 z-50 w-72 lg:w-80 transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 ${
-          sidebarOpen ? "translate-x-0" : "translate-x-full"
-        }`}
+        className={`fixed top-[72px] right-0 bottom-0 z-50 w-72 lg:w-80 lg:static lg:flex ${sidebarOpen ? "" : "hidden lg:flex"}`}
       >
         {sidebar}
       </div>
@@ -187,7 +181,7 @@ export default function Dashboard() {
       {/* Mobile toggle button */}
       <button
         onClick={() => setSidebarOpen(true)}
-        className="lg:hidden fixed bottom-6 right-6 z-30 bg-brand text-white shadow-lg flex items-center gap-2 px-5 py-3 rounded-full hover:bg-brand-dark transition-all active:scale-95"
+        className="lg:hidden fixed bottom-6 right-6 z-30 bg-brand text-white shadow-lg flex items-center gap-2 px-5 py-3 rounded-full hover:bg-brand-dark"
       >
         <Menu size={20} />
         <span className="text-sm font-medium">لوحة التحكم</span>
@@ -195,6 +189,19 @@ export default function Dashboard() {
 
       {/* Main Content */}
       <main className="flex-1 p-4 md:p-6 lg:p-10 overflow-auto min-h-[calc(100vh-72px)] max-w-full">
+        {me.emailVerified !== true && (
+          <div className="mb-6 bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3">
+            <svg className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="text-sm text-amber-800">
+              يرجى تأكيد بريدك الإلكتروني لتفعيل حسابك بالكامل. تحقق من صندوق الوارد أو{" "}
+              <Link to="/login" className="font-medium underline hover:text-amber-900">
+                اضغط لإعادة إرسال رابط التفعيل
+              </Link>
+            </p>
+          </div>
+        )}
         {renderContent()}
       </main>
     </div>

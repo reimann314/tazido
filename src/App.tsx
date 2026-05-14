@@ -12,6 +12,10 @@ import Auth from "./pages/Auth";
 import Jobs from "./pages/Jobs";
 import JobDetail from "./pages/JobDetail";
 import Dashboard from "./pages/dashboard/Dashboard";
+import VerifyEmail from "./pages/VerifyEmail";
+import ResetPassword from "./pages/ResetPassword";
+import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
 import RequireAuth from "./components/RequireAuth";
 import RedirectIfAuth from "./components/RedirectIfAuth";
 
@@ -40,6 +44,10 @@ function App() {
             <Route path="/login" element={<RedirectIfAuth><Auth /></RedirectIfAuth>} />
             <Route path="/jobs" element={<Jobs />} />
             <Route path="/jobs/:id" element={<JobDetail />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
             <Route
               path="/dashboard"
               element={
