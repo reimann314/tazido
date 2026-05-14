@@ -59,6 +59,20 @@ export default defineSchema({
     .index("by_company", ["companyId"])
     .index("by_status", ["status"]),
 
+  admins: defineTable({
+    username: v.string(),
+    passwordHash: v.string(),
+    displayName: v.string(),
+  }).index("by_username", ["username"]),
+
+  adminSessions: defineTable({
+    adminId: v.id("admins"),
+    token: v.string(),
+    expiresAt: v.number(),
+  })
+    .index("by_token", ["token"])
+    .index("by_admin", ["adminId"]),
+
   applications: defineTable({
     jobId: v.id("jobs"),
     studentId: v.id("users"),

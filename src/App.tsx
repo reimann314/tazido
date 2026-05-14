@@ -16,6 +16,9 @@ import VerifyEmail from "./pages/VerifyEmail";
 import ResetPassword from "./pages/ResetPassword";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
+import AdminLogin from "./pages/admin/AdminLogin";
+import AdminPage from "./pages/admin/AdminPage";
+import AdminGuard from "./components/AdminGuard";
 import RequireAuth from "./components/RequireAuth";
 import RedirectIfAuth from "./components/RedirectIfAuth";
 
@@ -27,40 +30,65 @@ function ScrollToTop() {
   return null;
 }
 
+function AppContent() {
+  const { pathname } = useLocation();
+  const isAdmin = pathname.startsWith("/admin");
+
+  if (isAdmin) {
+    return (
+      <Routes>
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route
+          path="/admin/*"
+          element={
+            <AdminGuard>
+              <AdminPage />
+            </AdminGuard>
+          }
+        />
+      </Routes>
+    );
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
+      <div className="flex-1">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/how-it-works" element={<HowItWorks />} />
+          <Route path="/for-companies" element={<ForCompanies />} />
+          <Route path="/for-talent" element={<ForTalent />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/signup" element={<RedirectIfAuth><Auth /></RedirectIfAuth>} />
+          <Route path="/login" element={<RedirectIfAuth><Auth /></RedirectIfAuth>} />
+          <Route path="/jobs" element={<Jobs />} />
+          <Route path="/jobs/:id" element={<JobDetail />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route
+            path="/dashboard"
+            element={
+              <RequireAuth>
+                <Dashboard />
+              </RequireAuth>
+            }
+          />
+        </Routes>
+      </div>
+      <Footer />
+      <CookieConsent />
+    </div>
+  );
+}
+
 function App() {
   return (
     <BrowserRouter>
       <ScrollToTop />
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <div className="flex-1">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/how-it-works" element={<HowItWorks />} />
-            <Route path="/for-companies" element={<ForCompanies />} />
-            <Route path="/for-talent" element={<ForTalent />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/signup" element={<RedirectIfAuth><Auth /></RedirectIfAuth>} />
-            <Route path="/login" element={<RedirectIfAuth><Auth /></RedirectIfAuth>} />
-            <Route path="/jobs" element={<Jobs />} />
-            <Route path="/jobs/:id" element={<JobDetail />} />
-            <Route path="/verify-email" element={<VerifyEmail />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/privacy" element={<Privacy />} />
-            <Route
-              path="/dashboard"
-              element={
-                <RequireAuth>
-                  <Dashboard />
-                </RequireAuth>
-              }
-            />
-          </Routes>
-        </div>
-        <Footer />
-        <CookieConsent />
-      </div>
+      <AppContent />
     </BrowserRouter>
   );
 }
