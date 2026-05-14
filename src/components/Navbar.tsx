@@ -183,14 +183,6 @@ export default function Navbar() {
                   </div>
                   <NotificationsBell />
                 </div>
-                  <span className="w-9 h-9 rounded-xl bg-brand/10 flex items-center justify-center text-brand text-sm font-bold">
-                    {me.name?.[0] || me.companyName?.[0] || "م"}
-                  </span>
-                  <div className="text-right">
-                    <p className="text-sm font-semibold text-text-primary">{me.name || me.companyName || "المستخدم"}</p>
-                    <p className="text-xs text-text-muted">{me.role === "student" ? "طالب" : "شركة"}</p>
-                  </div>
-                </div>
                 <Link
                   to="/dashboard"
                   onClick={() => setMobileOpen(false)}
