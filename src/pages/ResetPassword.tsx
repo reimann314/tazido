@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { useSearchParams, Link, useNavigate } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import { useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
 
 export default function ResetPassword() {
   const [params] = useSearchParams();
-  const navigate = useNavigate();
   const token = params.get("token");
   const userId = params.get("userId") as any;
   const resetPassword = useAction(api.auth.resetPassword);

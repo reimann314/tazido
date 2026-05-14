@@ -27,7 +27,6 @@ export default function Auth() {
 
   const signUp = useAction(api.auth.signUp);
   const signIn = useAction(api.auth.signIn);
-  const requestPasswordReset = useAction(api.auth.requestPasswordReset);
 
   useEffect(() => {
     setMode(location.pathname.includes("login") ? "login" : "signup");
