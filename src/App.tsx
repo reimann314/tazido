@@ -34,24 +34,23 @@ function App() {
   return (
     <BrowserRouter>
       <ScrollToTop />
-      <MainRoutes />
+      <Routes>
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route
+          path="/admin"
+          element={
+            <AdminGuard>
+              <AdminPage />
+            </AdminGuard>
+          }
+        />
+        <Route path="/*" element={<PublicApp />} />
+      </Routes>
     </BrowserRouter>
   );
 }
 
-function MainRoutes() {
-  const { pathname } = useLocation();
-  const isAdmin = pathname.startsWith("/admin");
-
-  if (isAdmin) {
-    return (
-      <Routes>
-        <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/admin" element={<AdminGuard><AdminPage /></AdminGuard>} />
-      </Routes>
-    );
-  }
-
+function PublicApp() {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />

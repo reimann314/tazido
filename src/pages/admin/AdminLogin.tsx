@@ -1,10 +1,33 @@
-import { useState } from "react";
+import { useState, type ReactNode, Component } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAction } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { setAdminToken } from "../../lib/admin-auth";
 
-export default function AdminLogin() {
+class ErrorBoundary extends Component<{ children: ReactNode }> {
+  state = { error: null as string | null };
+  static getDerivedStateFromError(error: Error) {
+    return { error: error.message };
+  }
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white p-8" dir="rtl">
+          <div className="max-w-md text-center">
+            <h1 className="text-xl font-bold mb-4">خطأ في تحميل الصفحة</h1>
+            <p className="text-gray-400 text-sm mb-4">{this.state.error}</p>
+            <button onClick={() => window.location.reload()} className="px-4 py-2 bg-brand rounded-lg text-sm">
+              إعادة تحميل
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+function LoginForm() {
   const navigate = useNavigate();
   const login = useAction(api.admin.adminLogin);
   const [username, setUsername] = useState("");
@@ -71,5 +94,13 @@ export default function AdminLogin() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function AdminLogin() {
+  return (
+    <ErrorBoundary>
+      <LoginForm />
+    </ErrorBoundary>
   );
 }
