@@ -107,6 +107,7 @@ export const getDashboardStats = query({
     const students = allUsers.filter((u) => u.role === "student");
     const companies = allUsers.filter((u) => u.role === "company");
     const verifiedUsers = allUsers.filter((u) => u.emailVerified === true);
+    const verifiedCompanies = allUsers.filter((u) => u.role === "company" && u.verified === true);
     const openJobs = allJobs.filter((j) => j.status === "open");
     const pendingApps = allApps.filter((a) => a.status === "pending");
 
@@ -115,6 +116,7 @@ export const getDashboardStats = query({
       totalStudents: students.length,
       totalCompanies: companies.length,
       verifiedUsers: verifiedUsers.length,
+      verifiedCompanies: verifiedCompanies.length,
       totalJobs: allJobs.length,
       openJobs: openJobs.length,
       totalApplications: allApps.length,
@@ -179,6 +181,7 @@ export const updateUser = mutation({
     userId: v.id("users"),
     updates: v.object({
       emailVerified: v.optional(v.boolean()),
+      verified: v.optional(v.boolean()),
       name: v.optional(v.string()),
       companyName: v.optional(v.string()),
       university: v.optional(v.string()),

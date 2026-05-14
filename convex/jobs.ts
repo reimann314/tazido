@@ -20,7 +20,7 @@ export const list = query({
     return await Promise.all(
       jobs.map(async (job) => {
         const company = await ctx.db.get(job.companyId);
-        return { ...job, companyName: company?.companyName ?? "شركة" };
+        return { ...job, companyName: company?.companyName ?? "شركة", companyVerified: company?.verified === true };
       }),
     );
   },
@@ -32,7 +32,7 @@ export const get = query({
     const job = await ctx.db.get(id);
     if (!job) return null;
     const company = await ctx.db.get(job.companyId);
-    return { ...job, companyName: company?.companyName ?? "شركة" };
+    return { ...job, companyName: company?.companyName ?? "شركة", companyVerified: company?.verified === true };
   },
 });
 

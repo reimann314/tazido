@@ -100,7 +100,15 @@ export default function JobDetail() {
               {JOB_TYPE_LABELS[job.type]}
             </span>
           </div>
-          <p className="text-text-secondary mb-1">{job.companyName}</p>
+          <p className="text-text-secondary mb-1 flex items-center gap-2">
+            {job.companyName}
+            {job.companyVerified && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-medium border border-emerald-200">
+                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                موثّق
+              </span>
+            )}
+          </p>
           <p className="text-text-secondary text-sm mb-6">{job.location}</p>
 
           <div className="prose prose-sm max-w-none whitespace-pre-wrap text-text-primary mb-8">

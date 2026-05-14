@@ -4,6 +4,7 @@ import { gsap } from "gsap";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { clearToken, getToken, useCurrentUser } from "../lib/auth";
+import NotificationsBell from "./NotificationsBell";
 
 export default function Navbar() {
   const me = useCurrentUser();
@@ -89,6 +90,7 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-3 shrink-0">
           {me ? (
             <>
+              <NotificationsBell />
               <Link
                 to="/dashboard"
                 className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ${
@@ -169,7 +171,18 @@ export default function Navbar() {
 
             {me ? (
               <div className="space-y-2 px-1">
-                <div className="flex items-center gap-3 px-3 py-2">
+                <div className="flex items-center justify-between px-3 py-2">
+                  <div className="flex items-center gap-3">
+                    <span className="w-9 h-9 rounded-xl bg-brand/10 flex items-center justify-center text-brand text-sm font-bold">
+                      {me.name?.[0] || me.companyName?.[0] || "م"}
+                    </span>
+                    <div className="text-right">
+                      <p className="text-sm font-semibold text-text-primary">{me.name || me.companyName || "المستخدم"}</p>
+                      <p className="text-xs text-text-muted">{me.role === "student" ? "طالب" : "شركة"}</p>
+                    </div>
+                  </div>
+                  <NotificationsBell />
+                </div>
                   <span className="w-9 h-9 rounded-xl bg-brand/10 flex items-center justify-center text-brand text-sm font-bold">
                     {me.name?.[0] || me.companyName?.[0] || "م"}
                   </span>

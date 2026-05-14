@@ -33,6 +33,7 @@ export default defineSchema({
     verificationToken: v.optional(v.string()),
     resetToken: v.optional(v.string()),
     resetTokenExpires: v.optional(v.number()),
+    verified: v.optional(v.boolean()),
   }).index("by_email", ["email"]),
 
   sessions: defineTable({
@@ -72,6 +73,22 @@ export default defineSchema({
   })
     .index("by_token", ["token"])
     .index("by_admin", ["adminId"]),
+
+  loginAttempts: defineTable({
+    email: v.string(),
+    attemptedAt: v.number(),
+  }).index("by_email", ["email"]),
+
+  notifications: defineTable({
+    userId: v.id("users"),
+    type: v.string(),
+    title: v.string(),
+    body: v.string(),
+    read: v.boolean(),
+    createdAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_unread", ["userId", "read"]),
 
   applications: defineTable({
     jobId: v.id("jobs"),

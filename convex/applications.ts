@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { internal } from "./_generated/api";
 import { requireRole } from "./sessionHelpers";
 
 const statusValidator = v.union(
@@ -25,12 +26,21 @@ export const apply = mutation({
       .unique();
     if (existing) throw new Error("لقد قدّمت على هذه الوظيفة من قبل");
 
-    return await ctx.db.insert("applications", {
+    const appId = await ctx.db.insert("applications", {
       jobId,
       studentId: user._id,
       status: "pending",
       appliedAt: Date.now(),
     });
+
+    await ctx.runMutation(internal.notifications._create, {
+      userId: job.companyId,
+      type: "new_application",
+      title: "تقديم جديد على وظيفة",
+      body: "قدّم " + (user.name ?? "طالب") + " على وظيفة " + job.title,
+    });
+
+    return appId;
   },
 });
 
@@ -104,5 +114,24 @@ export const setStatus = mutation({
     const job = await ctx.db.get(app.jobId);
     if (!job || job.companyId !== user._id) throw new Error("غير مصرّح");
     await ctx.db.patch(applicationId, { status });
+
+    const labels: Record<string, string> = {
+      reviewed: "تمت مراجعة طلبك",
+      accepted: "تهانينا! تم قبول طلبك",
+      rejected: "نأسف، لم يتم قبول طلبك",
+    };
+    const bodies: Record<string, string> = {
+      reviewed: "قامت الشركة بمراجعة طلبك على وظيفة " + (job?.title ?? ""),
+      accepted: "تم قبول طلبك على وظيفة " + (job?.title ?? ""),
+      rejected: "لم يتم قبول طلبك على وظيفة " + (job?.title ?? ""),
+    };
+    if (labels[status] && bodies[status]) {
+      await ctx.runMutation(internal.notifications._create, {
+        userId: app.studentId,
+        type: "application_status",
+        title: labels[status],
+        body: bodies[status],
+      });
+    }
   },
 });

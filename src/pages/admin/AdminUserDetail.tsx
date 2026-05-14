@@ -31,6 +31,7 @@ export default function AdminUserDetail({ userId, onBack }: { userId: Id<"users"
         userId,
         updates: {
           emailVerified: data.emailVerified === "true",
+          verified: data.verified === "true",
           name: data.name || undefined,
           companyName: data.companyName || undefined,
           university: data.university || undefined,
@@ -103,11 +104,23 @@ export default function AdminUserDetail({ userId, onBack }: { userId: Id<"users"
       </button>
 
       <form onSubmit={handleSave} className="bg-white rounded-2xl border border-gray-200 p-6 space-y-6">
-        <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between">
           <h3 className="text-lg font-bold text-gray-900">
             {user.name || user.companyName || "مستخدم"}
           </h3>
           <div className="flex items-center gap-3">
+            {user.role === "company" && (
+              <label className="flex items-center gap-2 text-sm text-gray-600">
+                <input
+                  type="checkbox"
+                  name="verified"
+                  defaultChecked={user.verified === true}
+                  value="true"
+                  className="rounded border-gray-300 text-brand focus:ring-brand"
+                />
+                موثّق
+              </label>
+            )}
             <label className="flex items-center gap-2 text-sm text-gray-600">
               <input
                 type="checkbox"

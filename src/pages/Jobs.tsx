@@ -48,6 +48,12 @@ export default function Jobs() {
               >
                 <div className="flex items-start justify-between gap-2 mb-3">
                   <h3 className="font-semibold text-text-primary">{job.title}</h3>
+                  {job.companyVerified && (
+                    <span className="shrink-0 flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-medium border border-emerald-200">
+                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                      موثّق
+                    </span>
+                  )}
                   <span className="text-xs px-2 py-1 rounded-full bg-brand/5 text-brand whitespace-nowrap">
                     {JOB_TYPE_LABELS[job.type]}
                   </span>

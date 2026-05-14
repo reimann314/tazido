@@ -40,6 +40,39 @@ export const _getUserById = internalQuery({
   },
 });
 
+export const _getRecentLoginAttempts = internalQuery({
+  args: { email: v.string() },
+  handler: async (ctx, { email }) => {
+    const fifteenMinAgo = Date.now() - 15 * 60 * 1000;
+    const attempts = await ctx.db
+      .query("loginAttempts")
+      .withIndex("by_email", (q) => q.eq("email", email))
+      .filter((q) => q.gte(q.field("attemptedAt"), fifteenMinAgo))
+      .collect();
+    return attempts.length;
+  },
+});
+
+export const _recordLoginAttempt = internalMutation({
+  args: { email: v.string() },
+  handler: async (ctx, { email }) => {
+    await ctx.db.insert("loginAttempts", { email, attemptedAt: Date.now() });
+  },
+});
+
+export const _clearLoginAttempts = internalMutation({
+  args: { email: v.string() },
+  handler: async (ctx, { email }) => {
+    const attempts = await ctx.db
+      .query("loginAttempts")
+      .withIndex("by_email", (q) => q.eq("email", email))
+      .collect();
+    for (const a of attempts) {
+      await ctx.db.delete(a._id);
+    }
+  },
+});
+
 export const _insertUser = internalMutation({
   args: {
     role: v.union(v.literal("student"), v.literal("company")),
@@ -256,14 +289,26 @@ export const signIn = action({
   args: { email: v.string(), password: v.string() },
   handler: async (ctx, args): Promise<{ token: string; userId: Id<"users"> }> => {
     const email = args.email.trim().toLowerCase();
+
+    // Rate limiting
+    const recentAttempts = await ctx.runQuery(internal.auth._getRecentLoginAttempts, { email });
+    if (recentAttempts >= 5) {
+      throw new Error("تم تجاوز عدد محاولات تسجيل الدخول المسموحة. الرجاء المحاولة بعد ١٥ دقيقة.");
+    }
+
     const user = await ctx.runQuery(internal.auth._getUserByEmail, { email });
     if (!user) {
+      await ctx.runMutation(internal.auth._recordLoginAttempt, { email });
       throw new Error("البريد أو كلمة المرور غير صحيحة. تحقّق من بياناتك وحاول مجدداً.");
     }
     const hash = await hashPassword(args.password);
     if (hash !== user.passwordHash) {
+      await ctx.runMutation(internal.auth._recordLoginAttempt, { email });
       throw new Error("البريد أو كلمة المرور غير صحيحة. تحقّق من بياناتك وحاول مجدداً.");
     }
+
+    // Clear rate limit on success
+    await ctx.runMutation(internal.auth._clearLoginAttempts, { email });
 
     if (user.emailVerified !== true) {
       // Auto-verify existing users who signed up before email verification existed

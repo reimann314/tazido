@@ -19,6 +19,7 @@ export default function AdminDashboard() {
     { label: "إجمالي المستخدمين", value: stats.totalUsers, icon: Users, color: "bg-blue-500" },
     { label: "الطلاب", value: stats.totalStudents, icon: GraduationCap, color: "bg-emerald-500" },
     { label: "الشركات", value: stats.totalCompanies, icon: Building2, color: "bg-violet-500" },
+    { label: "شركات موثّقة", value: stats.verifiedCompanies, icon: UserCheck, color: "bg-emerald-500" },
     { label: "المؤكدين", value: stats.verifiedUsers, icon: UserCheck, color: "bg-green-500" },
     { label: "الوظائف المنشورة", value: stats.totalJobs, icon: Briefcase, color: "bg-amber-500" },
     { label: "وظائف مفتوحة", value: stats.openJobs, icon: Briefcase, color: "bg-orange-500" },

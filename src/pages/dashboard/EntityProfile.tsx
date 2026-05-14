@@ -1,6 +1,8 @@
-import { Shield, Building2, FileText, Calendar, Clock, Upload, FileCheck, Phone, Mail, Hash, Activity } from "lucide-react";
+import { Shield, Building2, FileText, Calendar, Clock, Upload, FileCheck, Phone, Mail, Hash, Activity, BadgeCheck } from "lucide-react";
+import { useCurrentUser } from "../../lib/auth";
 
 export default function EntityProfile() {
+  const me = useCurrentUser();
   const documents = [
     { icon: Building2, label: "الاسم للشركة", field: "companyName", desc: "الاسم التجاري للشركة كما هو في السجل" },
     { icon: Hash, label: "رقم السجل التجاري", field: "commercialRegistration", desc: "الرقم الصادر من وزارة التجارة" },
@@ -28,7 +30,15 @@ export default function EntityProfile() {
               <Shield size={34} />
             </span>
             <div>
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">ملف المنشئة</h1>
+              <div className="flex items-center gap-3">
+                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">ملف المنشئة</h1>
+                {me?.verified === true && (
+                  <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-medium border border-emerald-500/30">
+                    <BadgeCheck size={14} />
+                    موثّق
+                  </span>
+                )}
+              </div>
               <p className="text-white/70 text-base md:text-lg mt-1">الشركات أو المؤسسات</p>
             </div>
           </div>
