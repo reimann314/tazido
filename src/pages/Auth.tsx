@@ -4,6 +4,7 @@ import { useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { login as authLogin, signup as authSignup } from "../lib/auth";
 import SEO from "../components/SEO";
+import ErrorBoundary from "../components/ErrorBoundary";
 
 type Role = "student" | "company";
 type Mode = "login" | "signup" | "forgot";
@@ -75,6 +76,7 @@ export default function Auth() {
   };
 
   return (
+    <ErrorBoundary>
     <div className="min-h-screen pt-[72px] bg-surface">
       <SEO title={mode === "login" ? "تسجيل الدخول" : "إنشاء حساب"} description={mode === "login" ? "سجّل الدخول إلى حسابك في تزيد" : "أنشئ حساب جديد في تزيد كطالب أو شركة"} />
       <div className="container-main py-12 md:py-20">
@@ -318,9 +320,10 @@ export default function Auth() {
               </p>
             </form>
           )}
+          </div>
         </div>
       </div>
-    </div>
+    </ErrorBoundary>
   );
 }
 
