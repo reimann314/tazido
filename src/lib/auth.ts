@@ -44,6 +44,7 @@ async function apiFetch(path: string, options: RequestInit = {}) {
 }
 
 let _initPromise: Promise<void> | null = null;
+let _authReady = false;
 
 export function initAuth(): Promise<void> {
   if (!_initPromise) {
@@ -55,10 +56,11 @@ export function initAuth(): Promise<void> {
         const data = await res.json();
         if (data.token) {
           _token = data.token;
-          notify();
         }
       }
     } catch { console.debug("initAuth: no session"); }
+    _authReady = true;
+    notify();
     })();
   }
   return _initPromise;
@@ -101,5 +103,10 @@ export function useCurrentUser() {
   }, []);
 
   const token = _token ?? undefined;
-  return useQuery(api.auth.me, token ? { token } : "skip");
+  const result = useQuery(api.auth.me, { token });
+
+  // While initAuth hasn't completed, treat null as "still loading"
+  if (!_authReady && result === null) return undefined;
+
+  return result;
 }
