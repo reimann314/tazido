@@ -229,6 +229,23 @@ export const getUsers = query({
   },
 });
 
+export const getVerificationRequests = query({
+  args: { adminToken: v.string() },
+  handler: async (ctx, { adminToken }) => {
+    const session = await ctx.db
+      .query("adminSessions")
+      .withIndex("by_token", (q) => q.eq("token", adminToken))
+      .unique();
+    if (!session || session.expiresAt < Date.now()) return null;
+
+    const users = await ctx.db.query("users").take(200);
+    return users
+      .filter((u) => u.role === "company" && u.verified !== true)
+      .map((u) => ({ ...u, passwordHash: undefined }))
+      .sort((a, b) => b._creationTime - a._creationTime);
+  },
+});
+
 export const getUserById = query({
   args: { adminToken: v.string(), userId: v.id("users") },
   handler: async (ctx, { adminToken, userId }) => {

@@ -4,6 +4,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Target, Users, TrendingUp, Briefcase, LayoutDashboard } from "lucide-react";
 import { useCurrentUser } from "../lib/auth";
+import SEO from "../components/SEO";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -56,6 +57,7 @@ export default function ForCompanies() {
 
   return (
     <main>
+      <SEO title="للشركات" description="ابحث عن الطالب المناسب بالتخصص الذي تحتاجه. افتح فرصة تدريب، حدّد التخصص، وتزيد تجلب لك أفضل الطلاب." />
       {/* Hero */}
       <section className="pt-[120px] pb-20 bg-surface">
         <div className="container-main">

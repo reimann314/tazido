@@ -4,6 +4,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Check, Award, LayoutDashboard } from "lucide-react";
 import { useCurrentUser } from "../lib/auth";
+import SEO from "../components/SEO";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -579,6 +580,10 @@ function FinalCTA() {
 export default function Home() {
   return (
     <main>
+      <SEO
+        title="سوق الطلاب المتخصصين للشركات"
+        description="تزيد تربط الشركات السعودية بالطلاب المتخصصين — تدريب وإقامة مهنية وتوظيف مباشر حسب التخصص الجامعي."
+      />
       <Hero />
       <Ticker />
       <HowItWorks />

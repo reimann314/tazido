@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Award, Eye, Lightbulb, Target, Heart, Shield, Globe } from "lucide-react";
+import SEO from "../components/SEO";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -40,6 +41,7 @@ export default function About() {
 
   return (
     <main>
+      <SEO title="عن تزيد" description="تزيد هي المنصة التي تحول المواهب السعودية من طاقة كامنة إلى إنتاجية دافعة للنمو." />
       {/* Hero Banner */}
       <section className="pt-[120px] pb-20 bg-brand-dark text-center">
         <div className="container-main">

@@ -4,6 +4,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { GraduationCap, Users, TrendingUp, BookOpen, Palette, Code, BarChart3, Gavel, Megaphone, Cpu, LayoutDashboard } from "lucide-react";
 import { useCurrentUser } from "../lib/auth";
+import SEO from "../components/SEO";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -62,6 +63,7 @@ export default function ForTalent() {
 
   return (
     <main>
+      <SEO title="للطلاب" description="اعمل في شركة حقيقية حسب تخصصك. انضم لتزيد، اعمل كمتدرب مقيم في شركة سعودية — وطريقك للوظيفة الكاملة يبدأ من أول يوم." />
       {/* Hero */}
       <section className="pt-[120px] pb-20 bg-surface">
         <div className="container-main">

@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate, useSearchParams } from "react-router-do
 import { useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { login as authLogin, signup as authSignup } from "../lib/auth";
+import SEO from "../components/SEO";
 
 type Role = "student" | "company";
 type Mode = "login" | "signup" | "forgot";
@@ -75,6 +76,7 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen pt-[72px] bg-surface">
+      <SEO title={mode === "login" ? "تسجيل الدخول" : "إنشاء حساب"} description={mode === "login" ? "سجّل الدخول إلى حسابك في تزيد" : "أنشئ حساب جديد في تزيد كطالب أو شركة"} />
       <div className="container-main py-12 md:py-20">
         <div className="max-w-2xl mx-auto bg-white rounded-3xl border border-border-light shadow-sm p-6 md:p-10">
           {/* Mode tabs */}

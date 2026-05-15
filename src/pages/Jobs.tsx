@@ -4,6 +4,7 @@ import { usePaginatedQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { JOB_TYPE_LABELS } from "../components/StatusBadge";
 import { CardSkeleton } from "../components/LoadingSkeletons";
+import SEO from "../components/SEO";
 
 type JobType = "all" | "internship" | "full-time" | "part-time";
 
@@ -21,6 +22,7 @@ export default function Jobs() {
   return (
     <div className="min-h-screen pt-[72px] bg-surface">
       <div className="container-main py-12 md:py-16">
+        <SEO title="الوظائف المتاحة" description="تصفّح أحدث الفرص التدريبية والوظيفية للطلاب في السعودية. قدّم مباشرة على وظائف تناسب تخصصك." />
         <h1 className="text-h2 mb-2">الوظائف المتاحة</h1>
         <p className="text-text-secondary mb-8">تصفّح أحدث الفرص وقدّم مباشرة.</p>
 

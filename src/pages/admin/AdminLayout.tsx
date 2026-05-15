@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Users, Briefcase, FileText, LogOut, Menu, X, Shield,
 } from "lucide-react";
 
-type AdminPage = "dashboard" | "users" | "jobs" | "applications";
+type AdminPage = "dashboard" | "users" | "jobs" | "applications" | "verifications";
 
 export default function AdminLayout({
   page,
@@ -26,6 +26,7 @@ export default function AdminLayout({
   const links: { label: string; key: AdminPage; icon: React.ReactNode }[] = [
     { label: "الإحصائيات", key: "dashboard", icon: <LayoutDashboard size={18} /> },
     { label: "المستخدمين", key: "users", icon: <Users size={18} /> },
+    { label: "التوثيق", key: "verifications", icon: <Shield size={18} /> },
     { label: "الوظائف", key: "jobs", icon: <Briefcase size={18} /> },
     { label: "الطلبات", key: "applications", icon: <FileText size={18} /> },
   ];

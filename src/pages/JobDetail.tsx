@@ -6,6 +6,7 @@ import type { Id } from "../../convex/_generated/dataModel";
 import { useCurrentUser, getToken } from "../lib/auth";
 import { JOB_TYPE_LABELS, StatusBadge } from "../components/StatusBadge";
 import { JobDetailSkeleton } from "../components/LoadingSkeletons";
+import SEO from "../components/SEO";
 
 export default function JobDetail() {
   const { id } = useParams<{ id: string }>();
@@ -94,6 +95,7 @@ export default function JobDetail() {
 
   return (
     <div className="min-h-screen pt-[72px] bg-surface">
+      <SEO title={job.title} description={job.description?.slice(0, 160)} />
       <div className="container-main py-12 md:py-16">
         <Link to="/jobs" className="text-sm text-brand mb-6 inline-block">← كل الوظائف</Link>
         <div className="bg-white rounded-3xl border border-border-light p-6 md:p-10 max-w-3xl">

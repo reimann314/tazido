@@ -76,7 +76,7 @@ http.route({
     const cookie = req.headers.get("Cookie") || "";
     const match = cookie.match(new RegExp(`${SESSION_COOKIE}=([^;]+)`));
     if (match) {
-      try { await ctx.runMutation(api.auth.signOut, { token: match[1] }); } catch {}
+      try { await ctx.runMutation(api.auth.signOut, { token: match[1] }); } catch { /* ignore */ }
     }
     return respond(req, null, 200, {
       "Set-Cookie": `${SESSION_COOKIE}=; HttpOnly; Secure; Path=/; SameSite=Lax; Max-Age=0`,

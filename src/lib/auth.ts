@@ -37,7 +37,7 @@ async function apiFetch(path: string, options: RequestInit = {}) {
     try {
       const errBody = await res.json();
       msg = errBody.message || errBody.error || msg;
-    } catch {}
+    } catch { console.debug("apiFetch: failed to parse error body"); }
     throw new Error(msg);
   }
   return res.json();
@@ -48,19 +48,17 @@ let _initPromise: Promise<void> | null = null;
 export function initAuth(): Promise<void> {
   if (!_initPromise) {
     _initPromise = (async () => {
-      try {
-        const url = `${SITE_URL}/api/auth/session`;
-        const res = await fetch(url, { credentials: "include" });
-        if (res.ok) {
-          const data = await res.json();
-          if (data.token) {
-            _token = data.token;
-            notify();
-          }
+    try {
+      const url = `${SITE_URL}/api/auth/session`;
+      const res = await fetch(url, { credentials: "include" });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.token) {
+          _token = data.token;
+          notify();
         }
-      } catch {
-        // Not logged in — that's fine
       }
+    } catch { console.debug("initAuth: no session"); }
     })();
   }
   return _initPromise;
@@ -87,7 +85,7 @@ export async function signup(body: Record<string, unknown>): Promise<string> {
 export async function logout() {
   try {
     await apiFetch("/api/auth/logout", { method: "POST" });
-  } catch {}
+  } catch { console.debug("logout: session may be expired"); }
   clearToken();
 }
 
