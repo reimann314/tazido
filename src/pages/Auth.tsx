@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { setToken } from "../lib/auth";
+import { login as authLogin, signup as authSignup } from "../lib/auth";
 
 type Role = "student" | "company";
 type Mode = "login" | "signup" | "forgot";
@@ -25,9 +25,6 @@ export default function Auth() {
   const [academicLevel, setAcademicLevel] = useState<AcademicLevel>("");
   const [entityType, setEntityType] = useState<EntityType>("");
 
-  const signUp = useAction(api.auth.signUp);
-  const signIn = useAction(api.auth.signIn);
-
   useEffect(() => {
     setMode(location.pathname.includes("login") ? "login" : "signup");
   }, [location.pathname]);
@@ -38,38 +35,38 @@ export default function Auth() {
     setSubmitting(true);
     setError(null);
     try {
-      const result =
-        mode === "signup"
-          ? await signUp({
-              role,
-              email: data.email,
-              password: data.password,
-              name: data.fullName,
-              companyName: data.companyName,
-              university: data.university,
-              website: data.website,
-              nationalId: data.nationalId,
-              mobileNumber: data.mobileNumber,
-              academicLevel: data.academicLevel,
-              specialization: data.specialization,
-              skills: data.skills,
-              languages: data.languages,
-              hobbies: data.hobbies,
-              experiences: data.experiences,
-              entityType: data.entityType,
-              entityName: data.entityName,
-              contactNumber: data.contactNumber,
-              commercialRegistration: data.commercialRegistration,
-              activities: data.activities,
-              crValidityDate: data.crValidityDate,
-              companyAge: data.companyAge,
-            })
-          : await signIn({ email: data.email, password: data.password });
-      setToken(result.token);
+      if (mode === "signup") {
+        await authSignup({
+          role,
+          email: data.email,
+          password: data.password,
+          name: data.fullName,
+          companyName: data.companyName,
+          university: data.university,
+          website: data.website,
+          nationalId: data.nationalId,
+          mobileNumber: data.mobileNumber,
+          academicLevel: data.academicLevel,
+          specialization: data.specialization,
+          skills: data.skills,
+          languages: data.languages,
+          hobbies: data.hobbies,
+          experiences: data.experiences,
+          entityType: data.entityType,
+          entityName: data.entityName,
+          contactNumber: data.contactNumber,
+          commercialRegistration: data.commercialRegistration,
+          activities: data.activities,
+          crValidityDate: data.crValidityDate,
+          companyAge: data.companyAge,
+        });
+      } else {
+        await authLogin(data.email, data.password);
+      }
       setDone(true);
       setTimeout(() => navigate("/dashboard"), 800);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message.replace(/^\[.*?\]\s*/, "") : "حدث خطأ";
+      const msg = err instanceof Error ? err.message : "حدث خطأ";
       setError(msg);
     } finally {
       setSubmitting(false);

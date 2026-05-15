@@ -1,23 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { gsap } from "gsap";
-import { useMutation } from "convex/react";
-import { api } from "../../convex/_generated/api";
-import { clearToken, getToken, useCurrentUser } from "../lib/auth";
+import { useCurrentUser, logout as authLogout } from "../lib/auth";
 import NotificationsBell from "./NotificationsBell";
 
 export default function Navbar() {
   const me = useCurrentUser();
   const navigate = useNavigate();
-  const signOut = useMutation(api.auth.signOut);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const onLogout = async () => {
-    const token = getToken();
-    if (token) {
-      try { await signOut({ token }); } catch { /* ignore */ }
-    }
-    clearToken();
+    await authLogout();
     setMobileOpen(false);
     navigate("/");
     window.location.reload();
