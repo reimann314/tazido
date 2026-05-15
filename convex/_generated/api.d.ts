@@ -11,6 +11,7 @@
 import type * as admin from "../admin.js";
 import type * as applications from "../applications.js";
 import type * as auth from "../auth.js";
+import type * as cv from "../cv.js";
 import type * as jobs from "../jobs.js";
 import type * as notifications from "../notifications.js";
 import type * as seed from "../seed.js";
@@ -28,6 +29,7 @@ declare const fullApi: ApiFromModules<{
   admin: typeof admin;
   applications: typeof applications;
   auth: typeof auth;
+  cv: typeof cv;
   jobs: typeof jobs;
   notifications: typeof notifications;
   seed: typeof seed;

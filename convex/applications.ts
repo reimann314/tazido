@@ -93,6 +93,10 @@ export const listByJob = query({
     return await Promise.all(
       apps.map(async (app) => {
         const student = await ctx.db.get(app.studentId);
+        let cvUrl: string | null = null;
+        if (student?.cvStorageId) {
+          cvUrl = await ctx.storage.getUrl(student.cvStorageId);
+        }
         return {
           _id: app._id,
           status: app.status,
@@ -100,6 +104,7 @@ export const listByJob = query({
           studentName: student?.name ?? "—",
           studentEmail: student?.email ?? "",
           university: student?.university ?? "",
+          cvUrl,
         };
       }),
     );
@@ -122,6 +127,10 @@ export const listByCompany = query({
         .collect();
       for (const app of apps) {
         const student = await ctx.db.get(app.studentId);
+        let cvUrl: string | null = null;
+        if (student?.cvStorageId) {
+          cvUrl = await ctx.storage.getUrl(student.cvStorageId);
+        }
         allApps.push({
           _id: app._id,
           status: app.status,
@@ -130,6 +139,7 @@ export const listByCompany = query({
           jobTitle: job.title,
           studentName: student?.name ?? "—",
           studentEmail: student?.email ?? "",
+          cvUrl,
         });
       }
     }

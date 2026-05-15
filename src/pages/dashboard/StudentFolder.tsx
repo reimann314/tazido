@@ -5,6 +5,7 @@ import { getToken, useCurrentUser } from "../../lib/auth";
 import {
   User, CreditCard, Mail, Phone, GraduationCap, BookOpen, Star, Globe, Heart, Briefcase, Building2, Shield, Send, CheckCircle, XCircle, Pencil,
 } from "lucide-react";
+import UploadCV from "../../components/UploadCV";
 
 type FieldDef = {
   icon: React.ElementType;
@@ -242,6 +243,11 @@ export default function StudentFolder() {
               );
             })}
           </div>
+
+          <div className="mb-10 max-w-lg">
+            <UploadCV />
+          </div>
+
           <div className="bg-surface rounded-2xl border border-border-light p-8 md:p-10 text-center">
             <div className="flex items-center justify-center gap-3 mb-4">
               <span className="w-12 h-12 rounded-xl bg-brand/10 flex items-center justify-center text-brand">

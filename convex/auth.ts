@@ -175,6 +175,7 @@ export const _insertUser = internalMutation({
     zakatCertificate: v.optional(v.string()),
     taxCertificate: v.optional(v.string()),
     contactNumber: v.optional(v.string()),
+    cvStorageId: v.optional(v.id("_storage")),
   },
   handler: async (ctx, args) => {
     const clean = Object.fromEntries(

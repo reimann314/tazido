@@ -4,6 +4,18 @@ import { api } from "../../../convex/_generated/api";
 import { getToken } from "../../lib/auth";
 import { StatusBadge } from "../../components/StatusBadge";
 import { TableSkeleton } from "../../components/LoadingSkeletons";
+import { FileText, ExternalLink } from "lucide-react";
+import type { Id } from "../../../convex/_generated/dataModel";
+
+type AppRow = {
+  _id: Id<"applications">;
+  studentName: string;
+  studentEmail: string;
+  jobTitle: string;
+  jobId: Id<"jobs">;
+  cvUrl: string | null;
+  status: "pending" | "reviewed" | "accepted" | "rejected";
+};
 
 export default function CandidatesPage() {
   const token = getToken() ?? undefined;
@@ -63,25 +75,42 @@ export default function CandidatesPage() {
                   <th className="text-right px-4 py-3 font-medium">الطالب</th>
                   <th className="text-right px-4 py-3 font-medium">البريد</th>
                   <th className="text-right px-4 py-3 font-medium">الوظيفة</th>
+                  <th className="text-right px-4 py-3 font-medium">السيرة الذاتية</th>
                   <th className="text-right px-4 py-3 font-medium">الحالة</th>
                   <th className="text-right px-4 py-3 font-medium">تحديث</th>
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((app) => (
+                {filtered.map((app: AppRow) => (
                   <tr key={app._id} className="border-t border-border-light">
                     <td className="px-4 py-3 text-text-primary font-medium">{app.studentName}</td>
                     <td className="px-4 py-3 text-text-secondary">{app.studentEmail}</td>
                     <td className="px-4 py-3 text-text-secondary">{app.jobTitle}</td>
                     <td className="px-4 py-3">
-                      <StatusBadge status={app.status as any} />
+                      {app.cvUrl ? (
+                        <a
+                          href={app.cvUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand/10 text-brand text-xs font-medium hover:bg-brand/20 transition-colors"
+                        >
+                          <FileText size={14} />
+                          <span>عرض CV</span>
+                          <ExternalLink size={12} />
+                        </a>
+                      ) : (
+                        <span className="text-xs text-text-muted">—</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
+                      <StatusBadge status={app.status} />
                     </td>
                     <td className="px-4 py-3">
                       <select
                         value={app.status}
-                        onChange={(e) =>
-                          token && setStatus({ token, applicationId: app._id, status: e.target.value as any })
-                        }
+                        onChange={(e) => {
+                          if (token) setStatus({ token, applicationId: app._id, status: e.target.value as AppRow["status"] });
+                        }}
                         className="px-3 py-1.5 rounded-lg border border-border-light bg-white text-sm"
                       >
                         <option value="pending">قيد المراجعة</option>

@@ -41,6 +41,7 @@ export default defineSchema({
     zakatCertificate: v.optional(v.string()),
     taxCertificate: v.optional(v.string()),
     contactNumber: v.optional(v.string()),
+    cvStorageId: v.optional(v.id("_storage")),
     emailVerified: v.optional(v.boolean()),
     verificationToken: v.optional(v.string()),
     resetToken: v.optional(v.string()),
