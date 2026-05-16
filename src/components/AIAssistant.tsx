@@ -34,8 +34,9 @@ export default function AIAssistant() {
     try {
       const reply = await ask({ question: text.trim() });
       setMessages((prev) => [...prev, { role: "assistant", text: reply }]);
-    } catch {
-      setMessages((prev) => [...prev, { role: "assistant", text: "عذراً، حدث خطأ في الاتصال. حاول مرة أخرى." }]);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "عذراً، حدث خطأ في الاتصال";
+      setMessages((prev) => [...prev, { role: "assistant", text: msg }]);
     }
     setLoading(false);
   };

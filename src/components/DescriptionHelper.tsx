@@ -21,7 +21,7 @@ export default function DescriptionHelper({ onSelect }: { onSelect: (text: strin
       const text = await generate({ title: title.trim(), details: details.trim() || undefined });
       setResult(text);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "حدث خطأ");
+      setError(err instanceof Error ? err.message.replace(/^\[.*?\]\s*/, "") : "حدث خطأ");
     }
     setLoading(false);
   };

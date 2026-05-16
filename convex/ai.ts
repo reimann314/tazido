@@ -21,7 +21,7 @@ async function callGemini(prompt: string): Promise<string> {
 
   if (!res.ok) {
     const err = await res.text();
-    throw new Error("فشل الاتصال بالمساعد الذكي: " + err);
+    throw new Error("خطأ AI (" + res.status + "): " + err.slice(0, 200));
   }
 
   const data = await res.json();
