@@ -114,6 +114,18 @@ export const _getUserById = internalQuery({
   },
 });
 
+export const _getSessionUser = internalQuery({
+  args: { token: v.string() },
+  handler: async (ctx, { token }) => {
+    const session = await ctx.db
+      .query("sessions")
+      .withIndex("by_token", (q) => q.eq("token", token))
+      .unique();
+    if (!session || session.expiresAt < Date.now()) return null;
+    return await ctx.db.get(session.userId);
+  },
+});
+
 export const _getRecentLoginAttempts = internalQuery({
   args: { email: v.string() },
   handler: async (ctx, { email }) => {

@@ -1,21 +1,55 @@
 import { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { useCurrentUser } from "../lib/auth";
-import { X, Send, Loader2, LogIn, Bot } from "lucide-react";
+import { useCurrentUser, getToken } from "../lib/auth";
+import { X, Send, Loader2, Bot, CheckCircle, XCircle } from "lucide-react";
 
-type Message = { role: "user" | "assistant"; text: string };
+type Message = { role: "user" | "assistant"; text: string; actions?: Action[] };
+
+type Action = {
+  name: string;
+  args: any;
+  result: string;
+};
+
+type PendingAction = {
+  description: string;
+  name: string;
+  args: any;
+};
 
 const suggestions = [
-  "كيف أنشر فرصة تدريب؟",
+  "انشر فرصة تدريب في تطوير الويب في الرياض",
+  "ابحث عن طلاب متخصصين في التسويق",
   "كيف أضيف عضو فريق؟",
-  "كيف أحدد موعد مقابلة؟",
-  "كيف أقيّم متدرب؟",
 ];
 
+function getActionLabel(name: string): string {
+  const labels: Record<string, string> = {
+    createOpportunity: "إنشاء فرصة جديدة",
+    searchStudents: "البحث عن طلاب",
+    sendMessageToStudent: "إرسال رسالة",
+  };
+  return labels[name] || name;
+}
+
+function getActionDescription(name: string, args: any): string {
+  switch (name) {
+    case "createOpportunity":
+      return `سأقوم بإنشاء فرصة جديدة:\n- العنوان: ${args.title}\n- الموقع: ${args.location}\n- النوع: ${args.type === "internship" ? "تدريب" : args.type === "full-time" ? "دوام كامل" : "دوام جزئي"}`;
+    case "searchStudents":
+      return `سأبحث عن طلاب${args.specialization ? ` في تخصص: ${args.specialization}` : ""}${args.skills ? ` بمهارات: ${args.skills}` : ""}`;
+    case "sendMessageToStudent":
+      return `سأرسل رسالة إلى الطالب`;
+    default:
+      return `تنفيذ: ${name}`;
+  }
+}
+
 export default function AIAssistant() {
-  const ask = useAction(api.ai.askAssistant);
+  const token = getToken() ?? "";
+  const agenticChat = useAction(api.aiAgent.agenticChat);
   const me = useCurrentUser();
   const isLoggedIn = me !== undefined && me !== null;
   const [open, setOpen] = useState(false);
@@ -24,25 +58,68 @@ export default function AIAssistant() {
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, pendingAction]);
 
   const handleSend = async (text: string) => {
-    if (!text.trim() || loading) return;
+    if (!text.trim() || loading || !token) return;
     setMessages((prev) => [...prev, { role: "user", text: text.trim() }]);
     setInput("");
     setLoading(true);
+
     try {
-      const reply = await ask({ question: text.trim() });
-      setMessages((prev) => [...prev, { role: "assistant", text: reply }]);
+      const history = messages.slice(1).map((m) => ({ role: m.role, text: m.text }));
+      const result = await agenticChat({ token, message: text.trim(), history });
+
+      if (result.actions && result.actions.length > 0) {
+        const action = result.actions[0];
+        if (action.name === "createOpportunity" || action.name === "sendMessageToStudent") {
+          setPendingAction({
+            description: getActionDescription(action.name, action.args),
+            name: action.name,
+            args: action.args,
+          });
+          return;
+        }
+      }
+
+      setMessages((prev) => [...prev, { role: "assistant", text: result.response, actions: result.actions }]);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "عذراً، حدث خطأ في الاتصال";
       setMessages((prev) => [...prev, { role: "assistant", text: msg }]);
     }
     setLoading(false);
+  };
+
+  const handleConfirm = async () => {
+    if (!pendingAction || !token) return;
+    setLoading(true);
+    setPendingAction(null);
+
+    try {
+      const history = messages.slice(1).map((m) => ({ role: m.role, text: m.text }));
+      const confirmMsg = `تأكيد: قم بتنفيذ "${pendingAction.name}" بالبيانات التالية: ${JSON.stringify(pendingAction.args)}`;
+      const result = await agenticChat({ token, message: confirmMsg, history });
+
+      setMessages((prev) => [...prev, {
+        role: "assistant",
+        text: result.response,
+        actions: result.actions,
+      }]);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "عذراً، حدث خطأ";
+      setMessages((prev) => [...prev, { role: "assistant", text: msg }]);
+    }
+    setLoading(false);
+  };
+
+  const handleReject = () => {
+    setPendingAction(null);
+    setMessages((prev) => [...prev, { role: "assistant", text: "تم إلغاء العملية." }]);
   };
 
   if (!isLoggedIn) return null;
@@ -77,17 +154,54 @@ export default function AIAssistant() {
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-gray-50/50 to-white">
-            {messages.length > 0 && messages.map((msg, i) => (
-              <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
-                  msg.role === "user"
-                    ? "bg-brand text-white rounded-br-sm shadow-sm"
-                    : "bg-white border border-border-light rounded-bl-sm shadow-sm"
-                }`}>
-                  <p>{msg.text}</p>
+            {messages.map((msg, i) => (
+              <div key={i}>
+                <div className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                  <div className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                    msg.role === "user"
+                      ? "bg-brand text-white rounded-br-sm shadow-sm"
+                      : "bg-white border border-border-light rounded-bl-sm shadow-sm"
+                  }`}>
+                    <p>{msg.text}</p>
+                  </div>
                 </div>
+                {msg.actions && msg.actions.length > 0 && (
+                  <div className="mt-1 mr-2">
+                    {msg.actions.map((a, j) => (
+                      <div key={j} className="text-[11px] text-emerald-600 font-medium">
+                        ✅ {getActionLabel(a.name)}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
+
+            {pendingAction && (
+              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 space-y-3">
+                <p className="text-sm font-medium text-amber-800">تأكيد العملية</p>
+                <p className="text-sm text-amber-700 whitespace-pre-wrap">{pendingAction.description}</p>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleConfirm}
+                    disabled={loading}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-medium hover:bg-emerald-700 disabled:opacity-60 transition-colors"
+                  >
+                    <CheckCircle size={14} />
+                    <span>تأكيد</span>
+                  </button>
+                  <button
+                    onClick={handleReject}
+                    disabled={loading}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-red-200 text-red-600 text-xs font-medium hover:bg-red-50 disabled:opacity-60 transition-colors"
+                  >
+                    <XCircle size={14} />
+                    <span>إلغاء</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
             {loading && (
               <div className="flex justify-start">
                 <div className="bg-white border border-border-light rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm">
@@ -98,7 +212,7 @@ export default function AIAssistant() {
             <div ref={bottomRef} />
           </div>
 
-          {messages.length === 1 && (
+          {messages.length === 1 && !pendingAction && (
             <div className="px-4 pb-3 pt-1 flex flex-wrap gap-1.5 border-t border-border-light/50">
               {suggestions.map((s) => (
                 <button
@@ -113,32 +227,25 @@ export default function AIAssistant() {
           )}
 
           <div className="p-3 border-t border-border-light bg-white">
-            {isLoggedIn ? (
+            {!pendingAction && (
               <div className="flex items-center gap-2">
                 <input
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSend(input))}
-                  placeholder="اكتب سؤالك هنا..."
-                  className="flex-1 px-4 py-2.5 rounded-xl border border-border-light bg-gray-50 text-sm focus:outline-none focus:border-brand focus:bg-white transition-colors"
+                  placeholder={isLoggedIn ? "اكتب سؤالك أو طلبك..." : "سجّل دخولك لاستخدام المساعد"}
+                  disabled={!isLoggedIn}
+                  className="flex-1 px-4 py-2.5 rounded-xl border border-border-light bg-gray-50 text-sm focus:outline-none focus:border-brand focus:bg-white transition-colors disabled:opacity-50"
                 />
                 <button
                   onClick={() => handleSend(input)}
-                  disabled={!input.trim() || loading}
+                  disabled={!input.trim() || loading || !isLoggedIn}
                   className="p-2.5 rounded-xl bg-brand text-white hover:bg-brand-dark disabled:opacity-50 transition-colors shadow-sm"
                 >
                   <Send size={18} />
                 </button>
               </div>
-            ) : (
-              <Link
-                to="/login"
-                className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-brand text-white text-sm font-medium hover:bg-brand-dark transition-all"
-              >
-                <LogIn size={16} />
-                <span>سجّل دخولك لاستخدام المساعد الذكي</span>
-              </Link>
             )}
           </div>
         </div>
