@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import CookieConsent from "./components/CookieConsent";
+import AIAssistant from "./components/AIAssistant";
 import Home from "./pages/Home";
 import HowItWorks from "./pages/HowItWorks";
 import ForCompanies from "./pages/ForCompanies";
@@ -83,6 +84,7 @@ function PublicApp() {
       </div>
       <Footer />
       <CookieConsent />
+      <AIAssistant />
     </div>
   );
 }

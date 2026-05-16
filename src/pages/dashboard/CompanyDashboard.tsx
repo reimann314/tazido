@@ -9,6 +9,7 @@ import {
   StatusBadge,
 } from "../../components/StatusBadge";
 import { TableSkeleton } from "../../components/LoadingSkeletons";
+import DescriptionHelper from "../../components/DescriptionHelper";
 
 type Me = { name?: string; companyName?: string };
 type JobType = "internship" | "full-time" | "part-time";
@@ -70,19 +71,22 @@ function JobForm({ token, onDone }: { token: string; onDone: () => void }) {
   const create = useMutation(api.jobs.create);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [location, setLocation] = useState("");
+  const [type, setType] = useState<JobType>("internship");
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const data = Object.fromEntries(new FormData(e.currentTarget).entries()) as Record<string, string>;
     setSubmitting(true);
     setError(null);
     try {
       await create({
         token,
-        title: data.title,
-        description: data.description,
-        location: data.location,
-        type: data.type as JobType,
+        title: title.trim(),
+        description: description.trim(),
+        location: location.trim(),
+        type,
       });
       onDone();
     } catch (err) {
@@ -103,22 +107,44 @@ function JobForm({ token, onDone }: { token: string; onDone: () => void }) {
           {error}
         </div>
       )}
-      <Field name="title" label="العنوان" required />
       <label className="block">
-        <span className="block text-sm font-medium mb-1.5">الوصف</span>
+        <span className="block text-sm font-medium mb-1.5">العنوان *</span>
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          required
+          className="w-full px-4 py-3 rounded-xl border border-border-light bg-surface focus:outline-none focus:border-brand focus:bg-white"
+        />
+      </label>
+      <label className="block">
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="block text-sm font-medium">الوصف *</span>
+          <DescriptionHelper onSelect={(text) => setDescription(text)} />
+        </div>
         <textarea
-          name="description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
           required
           rows={5}
           className="w-full px-4 py-3 rounded-xl border border-border-light bg-surface focus:outline-none focus:border-brand focus:bg-white"
         />
       </label>
-      <Field name="location" label="الموقع" required />
+      <label className="block">
+        <span className="block text-sm font-medium mb-1.5">الموقع *</span>
+        <input
+          type="text"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+          required
+          className="w-full px-4 py-3 rounded-xl border border-border-light bg-surface focus:outline-none focus:border-brand focus:bg-white"
+        />
+      </label>
       <label className="block">
         <span className="block text-sm font-medium mb-1.5">النوع</span>
         <select
-          name="type"
-          required
+          value={type}
+          onChange={(e) => setType(e.target.value as JobType)}
           className="w-full px-4 py-3 rounded-xl border border-border-light bg-surface focus:outline-none focus:border-brand focus:bg-white"
         >
           <option value="internship">تدريب</option>
@@ -246,26 +272,4 @@ function Applicants({ jobId, token }: { jobId: Id<"jobs">; token: string }) {
   );
 }
 
-function Field({
-  name,
-  label,
-  type = "text",
-  required,
-}: {
-  name: string;
-  label: string;
-  type?: string;
-  required?: boolean;
-}) {
-  return (
-    <label className="block">
-      <span className="block text-sm font-medium mb-1.5">{label}</span>
-      <input
-        name={name}
-        type={type}
-        required={required}
-        className="w-full px-4 py-3 rounded-xl border border-border-light bg-surface focus:outline-none focus:border-brand focus:bg-white"
-      />
-    </label>
-  );
-}
+
