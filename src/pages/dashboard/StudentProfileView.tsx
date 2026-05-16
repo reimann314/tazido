@@ -6,7 +6,7 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import {
   ArrowRight, User, Mail, Phone, CreditCard, GraduationCap, BookOpen,
   Star, Globe, Heart, Briefcase, Building2, FileText, ExternalLink,
-  Bookmark, Loader2, MessageCircle,
+  Bookmark, Loader2, MessageCircle, Award,
 } from "lucide-react";
 
 export default function StudentProfileView({
@@ -26,6 +26,7 @@ export default function StudentProfileView({
   const [messaging, setMessaging] = useState(false);
   const [msgDone, setMsgDone] = useState(false);
   const [showOfferForm, setShowOfferForm] = useState(false);
+  const [showProgramForm, setShowProgramForm] = useState(false);
 
   if (!profile) {
     return (
@@ -106,6 +107,13 @@ export default function StudentProfileView({
                 <Briefcase size={16} />
                 <span>عرض توظيف</span>
               </button>
+              <button
+                onClick={() => setShowProgramForm(true)}
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 text-white text-sm font-medium hover:bg-white/25 transition-colors"
+              >
+                <Award size={16} />
+                <span>برنامج تدريبي</span>
+              </button>
               {profile.cvUrl && (
                 <a
                   href={profile.cvUrl}
@@ -137,6 +145,14 @@ export default function StudentProfileView({
           </div>
         </div>
       </div>
+
+      {showProgramForm && (
+        <ProgramForm
+          token={token}
+          studentId={studentId}
+          onDone={() => setShowProgramForm(false)}
+        />
+      )}
 
       {showOfferForm && (
         <OfferForm
@@ -217,6 +233,69 @@ function OfferForm({ token, studentId, onDone }: { token: string; studentId: Id<
       <div className="flex items-center gap-3">
         <button type="submit" disabled={submitting} className="px-6 py-2.5 rounded-xl bg-brand text-white text-sm font-medium hover:bg-brand-dark disabled:opacity-60 transition-all">
           {submitting ? "جاري الإرسال..." : "إرسال العرض"}
+        </button>
+        <button type="button" onClick={onDone} className="px-6 py-2.5 rounded-xl border border-border-light text-text-secondary text-sm font-medium hover:bg-surface transition-all">
+          إلغاء
+        </button>
+      </div>
+    </form>
+  );
+}
+
+function ProgramForm({ token, studentId, onDone }: { token: string; studentId: Id<"users">; onDone: () => void }) {
+  const createProgram = useMutation(api.programs.create);
+  const [title, setTitle] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [supervisorName, setSupervisorName] = useState("");
+  const [notes, setNotes] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setError(null);
+    try {
+      await createProgram({ token, studentId, title, startDate, endDate: endDate || undefined, supervisorName: supervisorName || undefined, notes: notes || undefined });
+      onDone();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "حدث خطأ");
+    }
+    setSubmitting(false);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-border-light p-6 mb-8 space-y-4">
+      <h3 className="font-bold text-text-primary">برنامج تدريبي جديد</h3>
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">{error}</div>
+      )}
+      <div className="grid sm:grid-cols-2 gap-4">
+        <div className="sm:col-span-2">
+          <label className="block text-sm font-medium mb-1.5 text-text-primary">المسمى الوظيفي *</label>
+          <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} required className="w-full px-4 py-2.5 rounded-xl border border-border-light bg-surface text-sm focus:outline-none focus:border-brand" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1.5 text-text-primary">تاريخ البداية *</label>
+          <input type="text" value={startDate} onChange={(e) => setStartDate(e.target.value)} placeholder="مثال: 2026-07-01" required className="w-full px-4 py-2.5 rounded-xl border border-border-light bg-surface text-sm focus:outline-none focus:border-brand" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1.5 text-text-primary">تاريخ النهاية</label>
+          <input type="text" value={endDate} onChange={(e) => setEndDate(e.target.value)} placeholder="اختياري" className="w-full px-4 py-2.5 rounded-xl border border-border-light bg-surface text-sm focus:outline-none focus:border-brand" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1.5 text-text-primary">اسم المشرف</label>
+          <input type="text" value={supervisorName} onChange={(e) => setSupervisorName(e.target.value)} placeholder="اختياري" className="w-full px-4 py-2.5 rounded-xl border border-border-light bg-surface text-sm focus:outline-none focus:border-brand" />
+        </div>
+      </div>
+      <div>
+        <label className="block text-sm font-medium mb-1.5 text-text-primary">ملاحظات</label>
+        <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} className="w-full px-4 py-2.5 rounded-xl border border-border-light bg-surface text-sm focus:outline-none focus:border-brand resize-none" />
+      </div>
+      <div className="flex items-center gap-3">
+        <button type="submit" disabled={submitting} className="px-6 py-2.5 rounded-xl bg-brand text-white text-sm font-medium hover:bg-brand-dark disabled:opacity-60 transition-all">
+          {submitting ? "جاري الإرسال..." : "بدء البرنامج"}
         </button>
         <button type="button" onClick={onDone} className="px-6 py-2.5 rounded-xl border border-border-light text-text-secondary text-sm font-medium hover:bg-surface transition-all">
           إلغاء

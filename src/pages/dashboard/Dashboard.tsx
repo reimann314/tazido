@@ -22,8 +22,9 @@ import MessagesPage from "./MessagesPage";
 import InterviewsPage from "./InterviewsPage";
 import OffersPage from "./OffersPage";
 import CompanyMembers from "./CompanyMembers";
+import ProgramsPage from "./ProgramsPage";
 
-type Page = "dashboard" | "entity-profile" | "student-folder" | "applications" | "candidates" | "student-search" | "shortlists" | "messages" | "interviews" | "offers" | "reports" | "team" | "members" | "career" | "skills" | "settings";
+type Page = "dashboard" | "entity-profile" | "student-folder" | "applications" | "candidates" | "student-search" | "shortlists" | "messages" | "interviews" | "offers" | "programs" | "reports" | "team" | "members" | "career" | "skills" | "settings";
 
 type NavItem = {
   label: string;
@@ -49,6 +50,7 @@ export default function Dashboard() {
     { label: "الرسائل", key: "messages", icon: <MessageCircle size={20} /> },
     { label: "المقابلات", key: "interviews", icon: <Calendar size={20} /> },
     { label: "عروض التوظيف", key: "offers", icon: <Briefcase size={20} /> },
+    { label: "البرامج التدريبية", key: "programs", icon: <Award size={20} /> },
     { label: "فريق العمل", key: "members", icon: <UserCog size={20} /> },
     { label: "التقارير", key: "reports", icon: <TrendingUp size={20} /> },
     { label: "الإعدادات", key: "settings", icon: <Settings size={20} /> },
@@ -61,6 +63,7 @@ export default function Dashboard() {
     { label: "الرسائل", key: "messages", icon: <MessageCircle size={20} /> },
     { label: "المقابلات", key: "interviews", icon: <Calendar size={20} /> },
     { label: "عروضي", key: "offers", icon: <Briefcase size={20} /> },
+    { label: "برامجي التدريبية", key: "programs", icon: <Award size={20} /> },
     { label: "المسار المهني", key: "career", icon: <TrendingUp size={20} /> },
     { label: "المهارات والشهادات", key: "skills", icon: <Award size={20} /> },
     { label: "الإعدادات", key: "settings", icon: <Settings size={20} /> },
@@ -109,6 +112,8 @@ export default function Dashboard() {
         return <OffersPage />;
       case "members":
         return <CompanyMembers />;
+      case "programs":
+        return <ProgramsPage />;
       default:
         return isStudent ? <StudentDashboard me={me} /> : <CompanyDashboard me={me} />;
     }

@@ -208,4 +208,53 @@ export default defineSchema({
   })
     .index("by_company", ["companyId"])
     .index("by_student", ["studentId"]),
+
+  programs: defineTable({
+    companyId: v.id("users"),
+    studentId: v.id("users"),
+    jobId: v.optional(v.id("jobs")),
+    applicationId: v.optional(v.id("applications")),
+    title: v.string(),
+    startDate: v.string(),
+    endDate: v.optional(v.string()),
+    supervisorName: v.optional(v.string()),
+    status: v.union(
+      v.literal("pending"),
+      v.literal("active"),
+      v.literal("completed"),
+      v.literal("cancelled"),
+    ),
+    notes: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_company", ["companyId"])
+    .index("by_student", ["studentId"]),
+
+  evaluations: defineTable({
+    programId: v.id("programs"),
+    reviewerId: v.id("users"),
+    type: v.union(
+      v.literal("company_to_student"),
+      v.literal("student_to_company"),
+    ),
+    rating: v.number(),
+    skills: v.optional(v.number()),
+    attendance: v.optional(v.number()),
+    communication: v.optional(v.number()),
+    feedback: v.string(),
+    createdAt: v.number(),
+  })
+    .index("by_program", ["programId"]),
+
+  successStories: defineTable({
+    companyId: v.id("users"),
+    studentId: v.id("users"),
+    programId: v.id("programs"),
+    story: v.string(),
+    studentQuote: v.optional(v.string()),
+    companyQuote: v.optional(v.string()),
+    approved: v.boolean(),
+    createdAt: v.number(),
+  })
+    .index("by_approved", ["approved"]),
 });

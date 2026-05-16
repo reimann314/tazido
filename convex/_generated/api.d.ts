@@ -15,17 +15,20 @@ import type * as candidateNotes from "../candidateNotes.js";
 import type * as companyMembers from "../companyMembers.js";
 import type * as conversations from "../conversations.js";
 import type * as cv from "../cv.js";
+import type * as evaluations from "../evaluations.js";
 import type * as http from "../http.js";
 import type * as interviews from "../interviews.js";
 import type * as jobs from "../jobs.js";
 import type * as messages from "../messages.js";
 import type * as notifications from "../notifications.js";
 import type * as offers from "../offers.js";
+import type * as programs from "../programs.js";
 import type * as search from "../search.js";
 import type * as seed from "../seed.js";
 import type * as sessionHelpers from "../sessionHelpers.js";
 import type * as shortlists from "../shortlists.js";
 import type * as stats from "../stats.js";
+import type * as successStories from "../successStories.js";
 import type * as users from "../users.js";
 
 import type {
@@ -42,17 +45,20 @@ declare const fullApi: ApiFromModules<{
   companyMembers: typeof companyMembers;
   conversations: typeof conversations;
   cv: typeof cv;
+  evaluations: typeof evaluations;
   http: typeof http;
   interviews: typeof interviews;
   jobs: typeof jobs;
   messages: typeof messages;
   notifications: typeof notifications;
   offers: typeof offers;
+  programs: typeof programs;
   search: typeof search;
   seed: typeof seed;
   sessionHelpers: typeof sessionHelpers;
   shortlists: typeof shortlists;
   stats: typeof stats;
+  successStories: typeof successStories;
   users: typeof users;
 }>;
 

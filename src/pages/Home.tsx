@@ -5,6 +5,9 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Check, Award, LayoutDashboard } from "lucide-react";
 import { useCurrentUser } from "../lib/auth";
 import SEO from "../components/SEO";
+import { useQuery } from "convex/react";
+import { api } from "../../convex/_generated/api";
+import { Quote } from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -576,6 +579,50 @@ function FinalCTA() {
   );
 }
 
+/* ─── Success Stories ─── */
+function SuccessStories() {
+  const stories = useQuery(api.successStories.listApproved);
+
+  if (!stories || stories.length === 0) return null;
+
+  return (
+    <section className="section-padding bg-surface-pure">
+      <div className="container-main">
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-surface border border-border-light rounded-full mb-6">
+            <span className="w-2 h-2 bg-brand" />
+            <span className="text-text-secondary text-xs font-latin tracking-wider">SUCCESS STORIES — قصص نجاح</span>
+          </div>
+          <h2 className="text-h2 text-text-primary">
+            من متدرب إلى موظف.
+          </h2>
+          <p className="text-text-secondary mt-4 max-w-xl mx-auto">
+            قصص حقيقية لطلاب بدأوا مسارهم المهني مع شركات سعودية عبر تزيد.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-6">
+          {stories.slice(0, 4).map((story: { _id: string; story: string; studentName: string; companyName: string }) => (
+            <div key={story._id} className="bg-surface rounded-3xl p-8 border border-border-light">
+              <Quote className="w-8 h-8 text-brand/30 mb-4" />
+              <p className="text-text-primary leading-relaxed mb-6">{story.story}</p>
+              <div className="flex items-center gap-3 pt-4 border-t border-border-light">
+                <span className="w-10 h-10 rounded-full bg-brand/10 flex items-center justify-center text-brand font-bold text-sm">
+                  {(story.studentName || "ط")[0]}
+                </span>
+                <div>
+                  <p className="text-sm font-semibold text-text-primary">{story.studentName}</p>
+                  <p className="text-xs text-text-muted">{story.companyName}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ─── Home Page Export ─── */
 export default function Home() {
   return (
@@ -590,6 +637,7 @@ export default function Home() {
       <TwoPaths />
       <VisionBanner />
       <AwardSection />
+      <SuccessStories />
       <FinalCTA />
     </main>
   );
