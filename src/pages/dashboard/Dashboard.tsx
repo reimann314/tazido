@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useCurrentUser } from "../../lib/auth";
 import {
   LayoutDashboard, Briefcase, FileText, Settings,
@@ -35,6 +35,7 @@ type NavItem = {
 
 export default function Dashboard() {
   const me = useCurrentUser();
+  const navigate = useNavigate();
   if (!me) return null;
 
   const isStudent = me.role === "student";
@@ -75,15 +76,10 @@ export default function Dashboard() {
     if (item.comingSoon) return;
     if (item.key === "browse") {
       setSidebarOpen(false);
-      window.location.href = "/jobs";
+      navigate("/jobs");
       return;
     }
     setCurrentPage(item.key);
-    setSidebarOpen(false);
-  };
-
-  const handleBackToDashboard = () => {
-    setCurrentPage("dashboard");
     setSidebarOpen(false);
   };
 
@@ -174,16 +170,6 @@ export default function Dashboard() {
           );
         })}
       </nav>
-
-      <div className="px-3 pb-1 space-y-1">
-        <button
-          onClick={handleBackToDashboard}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-text-secondary hover:bg-surface hover:text-text-primary"
-        >
-          <span className="text-brand/70"><LayoutDashboard size={20} /></span>
-          <span>{isStudent ? "الفرص المقترحة" : "فرصي"}</span>
-        </button>
-      </div>
 
       <div className="p-4 border-t border-border-light">
         <a

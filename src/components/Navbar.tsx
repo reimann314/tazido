@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { gsap } from "gsap";
 import { useCurrentUser, logout as authLogout } from "../lib/auth";
 import NotificationsBell from "./NotificationsBell";
+import AnnouncementBanner from "./AnnouncementBanner";
 
 export default function Navbar() {
   const me = useCurrentUser();
@@ -51,13 +52,14 @@ export default function Navbar() {
   return (
     <nav
       ref={navRef}
-      className={`fixed top-0 right-0 left-0 z-50 h-[72px] transition-all duration-300 ${
+      className={`fixed top-0 right-0 left-0 z-50 transition-all duration-300 ${
         scrolled || !isHome
           ? "bg-surface/95 backdrop-blur-xl border-b border-border-light"
           : "bg-transparent"
       }`}
     >
-      <div className="container-main h-full flex items-center justify-between gap-4">
+      <AnnouncementBanner />
+      <div className="container-main h-[72px] flex items-center justify-between gap-4">
         <Link to="/" className="flex items-center shrink-0">
           <img src={logo} alt="تزيد" className="h-9 md:h-10 w-auto" />
         </Link>

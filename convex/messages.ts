@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { internal } from "./_generated/api";
 import { getUserFromToken } from "./sessionHelpers";
 
 export const list = query({
@@ -48,6 +49,17 @@ export const send = mutation({
       lastMessageBody: body.trim().slice(0, 100),
       lastMessageSender: user._id,
     });
+
+    // Notify other participant
+    const otherId = conversation.participants.find((p) => p !== user._id);
+    if (otherId) {
+      await ctx.runMutation(internal.notifications._create, {
+        userId: otherId,
+        type: "new_message",
+        title: "رسالة جديدة",
+        body: body.trim().slice(0, 80),
+      });
+    }
   },
 });
 

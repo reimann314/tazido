@@ -183,6 +183,8 @@ export default defineSchema({
       v.literal("completed"),
     ),
     notes: v.optional(v.string()),
+    meetingLink: v.optional(v.string()),
+    meetingInfo: v.optional(v.string()),
     createdAt: v.number(),
   })
     .index("by_company", ["companyId"])

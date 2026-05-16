@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { internal } from "./_generated/api";
 import { requireRole, getEffectiveCompanyId } from "./sessionHelpers";
 
 export const listByCompany = query({
@@ -58,7 +59,7 @@ export const create = mutation({
     if (!title.trim()) throw new Error("العنوان مطلوب");
     if (!startDate.trim()) throw new Error("تاريخ البداية مطلوب");
 
-    return await ctx.db.insert("offers", {
+    const offerId = await ctx.db.insert("offers", {
       companyId,
       studentId,
       jobId,
@@ -70,6 +71,15 @@ export const create = mutation({
       status: "pending",
       createdAt: Date.now(),
     });
+
+    await ctx.runMutation(internal.notifications._create, {
+      userId: studentId,
+      type: "offer_received",
+      title: "عرض توظيف جديد",
+      body: "قامت الشركة بإرسال عرض توظيف لك.",
+    });
+
+    return offerId;
   },
 });
 
@@ -88,6 +98,13 @@ export const respond = mutation({
     await ctx.db.patch(offerId, {
       status: accept ? "accepted" : "rejected",
       respondedAt: Date.now(),
+    });
+
+    await ctx.runMutation(internal.notifications._create, {
+      userId: offer.companyId,
+      type: "offer_response",
+      title: accept ? "تم قبول العرض" : "تم رفض العرض",
+      body: accept ? "قام الطالب بقبول عرض التوظيف." : "قام الطالب برفض عرض التوظيف.",
     });
   },
 });

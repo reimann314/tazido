@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { internal } from "./_generated/api";
 import { getUserFromToken, requireRole, getEffectiveCompanyId } from "./sessionHelpers";
 
 export const listByCompany = query({
@@ -58,7 +59,7 @@ export const create = mutation({
     const slots = [slot1, slot2];
     if (slot3) slots.push(slot3);
 
-    return await ctx.db.insert("interviews", {
+    const interviewId = await ctx.db.insert("interviews", {
       companyId,
       studentId,
       jobId,
@@ -68,6 +69,15 @@ export const create = mutation({
       notes,
       createdAt: Date.now(),
     });
+
+    await ctx.runMutation(internal.notifications._create, {
+      userId: studentId,
+      type: "interview_scheduled",
+      title: "موعد مقابلة جديد",
+      body: "قامت الشركة بتحديد موعد مقابلة. يرجى اختيار الوقت المناسب.",
+    });
+
+    return interviewId;
   },
 });
 
@@ -85,6 +95,38 @@ export const selectSlot = mutation({
     if (!interview.proposedSlots.includes(slot)) throw new Error("الموعد غير صالح");
 
     await ctx.db.patch(interviewId, { selectedSlot: slot, status: "confirmed" });
+
+    await ctx.runMutation(internal.notifications._create, {
+      userId: interview.companyId,
+      type: "interview_confirmed",
+      title: "تم تأكيد المقابلة",
+      body: "قام الطالب بتأكيد الموعد المقترح للمقابلة.",
+    });
+  },
+});
+
+export const setMeeting = mutation({
+  args: {
+    token: v.string(),
+    interviewId: v.id("interviews"),
+    meetingLink: v.string(),
+    meetingInfo: v.optional(v.string()),
+  },
+  handler: async (ctx, { token, interviewId, meetingLink, meetingInfo }) => {
+    const user = await requireRole(ctx, token, "company");
+    const companyId = getEffectiveCompanyId(user);
+    const interview = await ctx.db.get(interviewId);
+    if (!interview || interview.companyId !== companyId) throw new Error("غير مصرّح");
+    if (interview.status !== "confirmed") throw new Error("المقابلة غير مؤكدة بعد");
+
+    await ctx.db.patch(interviewId, { meetingLink, meetingInfo: meetingInfo?.trim() });
+
+    await ctx.runMutation(internal.notifications._create, {
+      userId: interview.studentId,
+      type: "interview_meeting",
+      title: "تم تحديد رابط المقابلة",
+      body: "قامت الشركة بإضافة رابط المقابلة. يمكنك الآن الدخول في الموعد المحدد.",
+    });
   },
 });
 
@@ -98,5 +140,13 @@ export const cancel = mutation({
       throw new Error("غير مصرّح");
     }
     await ctx.db.patch(interviewId, { status: "cancelled" });
+
+    const otherId = interview.companyId === user._id ? interview.studentId : interview.companyId;
+    await ctx.runMutation(internal.notifications._create, {
+      userId: otherId,
+      type: "interview_cancelled",
+      title: "تم إلغاء المقابلة",
+      body: "تم إلغاء المقابلة المحددة.",
+    });
   },
 });

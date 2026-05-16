@@ -4,7 +4,6 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import CookieConsent from "./components/CookieConsent";
 import AIAssistant from "./components/AIAssistant";
-import AnnouncementBanner from "./components/AnnouncementBanner";
 import Home from "./pages/Home";
 import HowItWorks from "./pages/HowItWorks";
 import ForCompanies from "./pages/ForCompanies";
@@ -57,7 +56,6 @@ function PublicApp() {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <AnnouncementBanner />
       <div className="flex-1">
         <Routes>
           <Route path="/" element={<Home />} />
@@ -67,9 +65,9 @@ function PublicApp() {
           <Route path="/about" element={<About />} />
           <Route path="/signup" element={<RedirectIfAuth><Auth /></RedirectIfAuth>} />
           <Route path="/login" element={<RedirectIfAuth><Auth /></RedirectIfAuth>} />
-          <Route path="/jobs" element={<Jobs />} />
-          <Route path="/jobs/:id" element={<JobDetail />} />
-          <Route path="/companies/:companyId" element={<CompanyProfile />} />
+          <Route path="/jobs" element={<RequireAuth><Jobs /></RequireAuth>} />
+          <Route path="/jobs/:id" element={<RequireAuth><JobDetail /></RequireAuth>} />
+          <Route path="/companies/:companyId" element={<RequireAuth><CompanyProfile /></RequireAuth>} />
           <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/terms" element={<Terms />} />

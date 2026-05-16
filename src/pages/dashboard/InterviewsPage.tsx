@@ -150,10 +150,54 @@ export default function InterviewsPage() {
                   <span>تم تأكيد الموعد: {formatDate(interview.selectedSlot)}</span>
                 </div>
               )}
+
+              {interview.status === "confirmed" && me?.role === "company" && (
+                <MeetingLinkForm interviewId={interview._id} existingLink={interview.meetingLink} existingInfo={interview.meetingInfo} />
+              )}
+
+              {interview.meetingLink && interview.status === "confirmed" && (
+                <div className="mt-3 bg-blue-50 border border-blue-200 rounded-xl p-4 space-y-2">
+                  <p className="text-sm font-medium text-blue-800">رابط المقابلة:</p>
+                  <a href={interview.meetingLink} target="_blank" rel="noopener noreferrer" className="text-sm text-brand underline break-all hover:text-brand-dark">
+                    {interview.meetingLink}
+                  </a>
+                  {interview.meetingInfo && (
+                    <p className="text-sm text-blue-700">{interview.meetingInfo}</p>
+                  )}
+                </div>
+              )}
             </div>
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+function MeetingLinkForm({ interviewId, existingLink, existingInfo }: { interviewId: Id<"interviews">; existingLink?: string; existingInfo?: string }) {
+  const token = getToken() ?? "";
+  const setMeeting = useMutation(api.interviews.setMeeting);
+  const [link, setLink] = useState(existingLink || "");
+  const [info, setInfo] = useState(existingInfo || "");
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async () => {
+    if (!link.trim()) return;
+    setSaving(true);
+    try {
+      await setMeeting({ token, interviewId, meetingLink: link.trim(), meetingInfo: info.trim() || undefined });
+    } catch { console.debug("meeting link save error"); }
+    setSaving(false);
+  };
+
+  return (
+    <div className="mt-4 bg-white border border-border-light rounded-xl p-4 space-y-3">
+      <p className="text-sm font-semibold text-text-primary">إضافة رابط المقابلة</p>
+      <input type="text" value={link} onChange={(e) => setLink(e.target.value)} placeholder="https://meet.google.com/..." className="w-full px-3 py-2 rounded-lg border border-border-light bg-surface text-sm focus:outline-none focus:border-brand" />
+      <textarea value={info} onChange={(e) => setInfo(e.target.value)} rows={2} placeholder="معلومات إضافية (اختياري)" className="w-full px-3 py-2 rounded-lg border border-border-light bg-surface text-sm focus:outline-none focus:border-brand resize-none" />
+      <button onClick={handleSave} disabled={saving || !link.trim()} className="px-4 py-2 rounded-lg bg-brand text-white text-sm font-medium hover:bg-brand-dark disabled:opacity-60 transition-colors">
+        {saving ? "جاري الحفظ..." : "حفظ"}
+      </button>
     </div>
   );
 }

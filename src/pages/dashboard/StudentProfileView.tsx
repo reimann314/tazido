@@ -6,7 +6,7 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import {
   ArrowRight, User, Mail, Phone, CreditCard, GraduationCap, BookOpen,
   Star, Globe, Heart, Briefcase, Building2, FileText, ExternalLink,
-  Bookmark, Loader2, MessageCircle, Award,
+  Bookmark, Loader2, MessageCircle, Award, Calendar,
 } from "lucide-react";
 
 export default function StudentProfileView({
@@ -27,6 +27,7 @@ export default function StudentProfileView({
   const [msgDone, setMsgDone] = useState(false);
   const [showOfferForm, setShowOfferForm] = useState(false);
   const [showProgramForm, setShowProgramForm] = useState(false);
+  const [showInterviewForm, setShowInterviewForm] = useState(false);
 
   if (!profile) {
     return (
@@ -114,6 +115,13 @@ export default function StudentProfileView({
                 <Award size={16} />
                 <span>برنامج تدريبي</span>
               </button>
+              <button
+                onClick={() => setShowInterviewForm(true)}
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 text-white text-sm font-medium hover:bg-white/25 transition-colors"
+              >
+                <Calendar size={16} />
+                <span>دعوة لمقابلة</span>
+              </button>
               {profile.cvUrl && (
                 <a
                   href={profile.cvUrl}
@@ -145,6 +153,14 @@ export default function StudentProfileView({
           </div>
         </div>
       </div>
+
+      {showInterviewForm && (
+        <InterviewForm
+          token={token}
+          studentId={studentId}
+          onDone={() => setShowInterviewForm(false)}
+        />
+      )}
 
       {showProgramForm && (
         <ProgramForm
@@ -296,6 +312,74 @@ function ProgramForm({ token, studentId, onDone }: { token: string; studentId: I
       <div className="flex items-center gap-3">
         <button type="submit" disabled={submitting} className="px-6 py-2.5 rounded-xl bg-brand text-white text-sm font-medium hover:bg-brand-dark disabled:opacity-60 transition-all">
           {submitting ? "جاري الإرسال..." : "بدء البرنامج"}
+        </button>
+        <button type="button" onClick={onDone} className="px-6 py-2.5 rounded-xl border border-border-light text-text-secondary text-sm font-medium hover:bg-surface transition-all">
+          إلغاء
+        </button>
+      </div>
+    </form>
+  );
+}
+
+function InterviewForm({ token, studentId, onDone }: { token: string; studentId: Id<"users">; onDone: () => void }) {
+  const createInterview = useMutation(api.interviews.create);
+  const [slot1, setSlot1] = useState("");
+  const [slot2, setSlot2] = useState("");
+  const [slot3, setSlot3] = useState("");
+  const [notes, setNotes] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const toTimestamp = (s: string) => new Date(s).getTime();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!slot1 || !slot2) { setError("الرجاء إدخال موعدين على الأقل"); return; }
+    const t1 = toTimestamp(slot1);
+    const t2 = toTimestamp(slot2);
+    if (isNaN(t1) || isNaN(t2)) { setError("صيغة التاريخ غير صحيحة"); return; }
+    setSubmitting(true);
+    setError(null);
+    try {
+      await createInterview({
+        token, studentId,
+        slot1: t1, slot2: t2,
+        slot3: slot3 ? toTimestamp(slot3) : undefined,
+        notes: notes || undefined,
+      });
+      onDone();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "حدث خطأ");
+    }
+    setSubmitting(false);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-border-light p-6 mb-8 space-y-4">
+      <h3 className="font-bold text-text-primary">دعوة لمقابلة</h3>
+      {error && <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">{error}</div>}
+      <p className="text-sm text-text-secondary">اختر موعدين أو ثلاثة مواعيد مقترحة. سيختار الطالب الأنسب له.</p>
+      <div className="grid sm:grid-cols-3 gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-1.5 text-text-primary">الموعد الأول *</label>
+          <input type="datetime-local" value={slot1} onChange={(e) => setSlot1(e.target.value)} required className="w-full px-4 py-2.5 rounded-xl border border-border-light bg-surface text-sm focus:outline-none focus:border-brand" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1.5 text-text-primary">الموعد الثاني *</label>
+          <input type="datetime-local" value={slot2} onChange={(e) => setSlot2(e.target.value)} required className="w-full px-4 py-2.5 rounded-xl border border-border-light bg-surface text-sm focus:outline-none focus:border-brand" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1.5 text-text-primary">الموعد الثالث</label>
+          <input type="datetime-local" value={slot3} onChange={(e) => setSlot3(e.target.value)} className="w-full px-4 py-2.5 rounded-xl border border-border-light bg-surface text-sm focus:outline-none focus:border-brand" />
+        </div>
+      </div>
+      <div>
+        <label className="block text-sm font-medium mb-1.5 text-text-primary">ملاحظات</label>
+        <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} className="w-full px-4 py-2.5 rounded-xl border border-border-light bg-surface text-sm focus:outline-none focus:border-brand resize-none" />
+      </div>
+      <div className="flex items-center gap-3">
+        <button type="submit" disabled={submitting} className="px-6 py-2.5 rounded-xl bg-brand text-white text-sm font-medium hover:bg-brand-dark disabled:opacity-60 transition-all">
+          {submitting ? "جاري الإرسال..." : "إرسال الدعوة"}
         </button>
         <button type="button" onClick={onDone} className="px-6 py-2.5 rounded-xl border border-border-light text-text-secondary text-sm font-medium hover:bg-surface transition-all">
           إلغاء
