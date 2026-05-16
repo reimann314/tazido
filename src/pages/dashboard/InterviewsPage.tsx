@@ -6,6 +6,9 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import { Calendar, Clock, CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { TableSkeleton } from "../../components/LoadingSkeletons";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type InterviewItem = any;
+
 function formatDate(ts: number) {
   return new Date(ts).toLocaleDateString("ar", {
     weekday: "long", year: "numeric", month: "long", day: "numeric",
@@ -99,7 +102,7 @@ export default function InterviewsPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {items.map((interview) => (
+          {(items as InterviewItem[]).map((interview) => (
             <div key={interview._id} className="bg-white rounded-2xl border border-border-light p-6">
               <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
                 <div>
@@ -116,7 +119,7 @@ export default function InterviewsPage() {
               <p className="text-xs text-text-muted mb-3">المواعيد المقترحة:</p>
               <SlotPicker
                 slots={interview.proposedSlots}
-                selected={interview.selectedSlot}
+                selected={interview.selectedSlot ?? null}
                 onSelect={(slot) => handleSelectSlot(interview._id, slot)}
               />
 

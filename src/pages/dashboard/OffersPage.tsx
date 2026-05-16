@@ -6,6 +6,9 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import { Briefcase, CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { TableSkeleton } from "../../components/LoadingSkeletons";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type OfferItem = any;
+
 export default function OffersPage() {
   const token = getToken() ?? "";
   const me = useCurrentUser();
@@ -67,7 +70,7 @@ export default function OffersPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {items.map((offer) => (
+          {(items as OfferItem[]).map((offer) => (
             <div key={offer._id} className="bg-white rounded-2xl border border-border-light p-6">
               <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
                 <div>
