@@ -3,7 +3,9 @@ import { useState, useRef, useEffect } from "react";
 import { useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useCurrentUser, getToken } from "../lib/auth";
-import { X, Send, Loader2, Bot, CheckCircle, XCircle, FileText, Search, Sparkles } from "lucide-react";
+import {
+  Send, Loader2, Bot, CheckCircle, XCircle, FileText, Search, Sparkles, PanelRightClose,
+} from "lucide-react";
 
 type Message = { role: "user" | "assistant"; text: string; type?: "text" | "success" | "error" };
 
@@ -23,9 +25,9 @@ function formatResponse(text: string): string {
 
 function getIconForAction(name: string) {
   switch (name) {
-    case "createOpportunity": return <FileText size={14} className="text-emerald-600" />;
-    case "searchStudents": return <Search size={14} className="text-blue-600" />;
-    default: return <Sparkles size={14} className="text-brand" />;
+    case "createOpportunity": return <FileText size={16} className="text-emerald-600" />;
+    case "searchStudents": return <Search size={16} className="text-blue-600" />;
+    default: return <Sparkles size={16} className="text-brand" />;
   }
 }
 
@@ -44,8 +46,10 @@ export default function AIAssistant() {
   const [pendingAction, setPendingAction] = useState<any>(null);
   const [executing, setExecuting] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, pendingAction]);
+  useEffect(() => { if (open && !loading) inputRef.current?.focus(); }, [open, loading]);
 
   const handleSend = async (text: string) => {
     if (!text.trim() || loading || !token) return;
@@ -56,16 +60,13 @@ export default function AIAssistant() {
     try {
       const history = messages.slice(1).map((m) => ({ role: m.role, text: m.text }));
       const result = await agenticChat({ token, message: text.trim(), history });
-      if (result.pending) {
-        setPendingAction(result.pending);
-      }
-      if (result.response) {
-        setMessages((prev) => [...prev, { role: "assistant", text: result.response }]);
-      }
+      if (result.pending) setPendingAction(result.pending);
+      if (result.response) setMessages((prev) => [...prev, { role: "assistant", text: result.response }]);
     } catch (err) {
       setMessages((prev) => [...prev, { role: "assistant", text: err instanceof Error ? err.message : "حدث خطأ", type: "error" }]);
     }
     setLoading(false);
+    if (!pendingAction) setTimeout(() => inputRef.current?.focus(), 100);
   };
 
   const handleConfirm = async () => {
@@ -79,49 +80,72 @@ export default function AIAssistant() {
       setMessages((prev) => [...prev, { role: "assistant", text: err instanceof Error ? err.message : "حدث خطأ", type: "error" }]);
     }
     setExecuting(false);
+    setTimeout(() => inputRef.current?.focus(), 100);
   };
 
   const handleReject = () => {
     setPendingAction(null);
-    setMessages((prev) => [...prev, { role: "assistant", text: "تم إلغاء العملية.", type: "text" }]);
+    setTimeout(() => inputRef.current?.focus(), 100);
+  };
+
+  const resetChat = () => {
+    setMessages([{ role: "assistant", text: "مرحباً! أنا مساعد تزيد الذكي. كيف يمكنني مساعدتك؟" }]);
+    setPendingAction(null);
   };
 
   if (!isLoggedIn) return null;
 
   return (
     <>
+      {/* Trigger button */}
       {!open && (
         <button onClick={() => setOpen(true)}
-          className="fixed bottom-6 left-6 z-40 flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-l from-brand to-brand-light text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all border border-white/20">
-          <Bot size={20} />
+          className="fixed bottom-6 left-6 z-40 flex items-center gap-3 px-5 py-3.5 rounded-2xl bg-gradient-to-l from-brand to-brand-light text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all border border-white/20">
+          <Bot size={22} />
           <span className="text-sm font-bold">AI Assistant</span>
+          <Sparkles size={14} className="text-gold/80" />
         </button>
       )}
 
+      {/* Overlay */}
+      {open && <div className="fixed inset-0 bg-black/20 z-40" onClick={() => setOpen(false)} />}
+
+      {/* Side panel */}
       {open && (
-        <div className="fixed bottom-6 left-6 z-40 w-[380px] bg-white rounded-2xl border border-border-light shadow-2xl overflow-hidden flex flex-col" style={{ maxHeight: "600px" }}>
-          <div className="bg-gradient-to-l from-brand to-brand-light text-white p-4 flex items-center justify-between">
+        <div className="fixed top-0 left-0 h-full w-full sm:w-[440px] z-50 bg-white shadow-2xl flex flex-col animate-slide-in">
+          {/* Header */}
+          <div className="bg-gradient-to-l from-brand to-brand-light text-white px-5 py-4 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-3">
-              <span className="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center"><Bot size={18} /></span>
+              <span className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center backdrop-blur-sm">
+                <Bot size={20} />
+              </span>
               <div>
-                <p className="font-bold text-sm">AI Assistant</p>
-                <p className="text-[10px] text-white/70">مساعد تزيد الذكي</p>
+                <p className="font-bold text-base">AI Assistant</p>
+                <p className="text-[11px] text-white/70">مساعد تزيد الذكي — وكيل ذكي لتنفيذ المهام</p>
               </div>
             </div>
-            <button onClick={() => setOpen(false)} className="p-1.5 hover:bg-white/20 rounded-xl"><X size={16} /></button>
+            <div className="flex items-center gap-2">
+              <button onClick={resetChat} className="text-[11px] px-3 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 transition-colors">
+                جديد
+              </button>
+              <button onClick={() => setOpen(false)} className="p-2 hover:bg-white/20 rounded-xl transition-colors">
+                <PanelRightClose size={18} />
+              </button>
+            </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gradient-to-b from-gray-50/50 to-white">
+          {/* Messages */}
+          <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4 bg-gray-50/30">
             {messages.map((msg, i) => (
               <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[90%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
+                <div className={`max-w-[88%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                   msg.role === "user"
-                    ? "bg-brand text-white rounded-br-sm shadow-sm"
+                    ? "bg-brand text-white rounded-br-md shadow-sm"
                     : msg.type === "success"
-                    ? "bg-emerald-50 border border-emerald-200 rounded-bl-sm"
+                    ? "bg-emerald-50 border border-emerald-200 rounded-bl-md"
                     : msg.type === "error"
-                    ? "bg-red-50 border border-red-200 rounded-bl-sm"
-                    : "bg-white border border-border-light rounded-bl-sm shadow-sm"
+                    ? "bg-red-50 border border-red-200 rounded-bl-md"
+                    : "bg-white border border-border-light rounded-bl-md shadow-sm"
                 }`}>
                   <p className="whitespace-pre-wrap">{formatResponse(msg.text)}</p>
                 </div>
@@ -129,20 +153,22 @@ export default function AIAssistant() {
             ))}
 
             {pendingAction && (
-              <div className="bg-amber-50 border-2 border-amber-300 rounded-2xl p-4 space-y-3 shadow-md">
-                <div className="flex items-center gap-2">
-                  {getIconForAction(pendingAction.name)}
-                  <p className="text-sm font-bold text-amber-900">طلب تأكيد</p>
+              <div className="bg-amber-50 border-2 border-amber-300 rounded-2xl p-5 space-y-4 shadow-md">
+                <div className="flex items-center gap-2.5">
+                  <span className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center">
+                    {getIconForAction(pendingAction.name)}
+                  </span>
+                  <p className="text-sm font-bold text-amber-900">طلب تأكيد الإجراء</p>
                 </div>
                 <p className="text-sm text-amber-800 whitespace-pre-wrap leading-relaxed">{pendingAction.description}</p>
-                <div className="flex items-center gap-2 pt-1">
+                <div className="flex items-center gap-3 pt-1">
                   <button onClick={handleConfirm} disabled={executing}
-                    className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-emerald-600 text-white text-sm font-bold hover:bg-emerald-700 disabled:opacity-60 shadow-sm transition-all">
+                    className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-bold hover:bg-emerald-700 disabled:opacity-60 shadow-sm transition-all">
                     {executing ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
                     <span>{executing ? "جاري التنفيذ..." : "تأكيد"}</span>
                   </button>
                   <button onClick={handleReject} disabled={executing}
-                    className="flex items-center gap-1.5 px-5 py-2 rounded-xl border-2 border-red-200 bg-white text-red-600 text-sm font-bold hover:bg-red-50 disabled:opacity-60 transition-all">
+                    className="flex items-center gap-2 px-6 py-2.5 rounded-xl border-2 border-red-200 bg-white text-red-600 text-sm font-bold hover:bg-red-50 disabled:opacity-60 transition-all">
                     <XCircle size={16} />
                     <span>إلغاء</span>
                   </button>
@@ -152,41 +178,45 @@ export default function AIAssistant() {
 
             {(loading || executing) && !pendingAction && (
               <div className="flex justify-start">
-                <div className="bg-white border border-border-light rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm flex items-center gap-2">
-                  <Loader2 size={16} className="animate-spin text-brand" />
-                  <span className="text-sm text-text-secondary">{executing ? "جاري التنفيذ..." : "جاري التفكير..."}</span>
+                <div className="bg-white border border-border-light rounded-2xl rounded-bl-md px-5 py-3.5 shadow-sm flex items-center gap-3">
+                  <Loader2 size={18} className="animate-spin text-brand" />
+                  <span className="text-sm text-text-secondary">{executing ? "جاري تنفيذ الإجراء..." : "جاري التحليل..."}</span>
                 </div>
               </div>
             )}
             <div ref={bottomRef} />
           </div>
 
+          {/* Suggestions */}
           {messages.length === 1 && !pendingAction && (
-            <div className="px-4 pb-3 flex flex-wrap gap-1.5 border-t border-border-light/50 pt-3">
+            <div className="px-5 py-3 flex flex-wrap gap-2 border-t border-border-light bg-white">
               {suggestions.map((s) => (
                 <button key={s} onClick={() => handleSend(s)}
-                  className="px-3 py-1.5 rounded-full bg-brand/5 text-brand text-[11px] font-medium hover:bg-brand/10 transition-colors border border-brand/10">
+                  className="px-4 py-2 rounded-full bg-brand/5 text-brand text-xs font-medium hover:bg-brand/10 transition-colors border border-brand/15">
                   {s}
                 </button>
               ))}
             </div>
           )}
 
-          <div className="p-3 border-t border-border-light bg-white">
+          {/* Input */}
+          <div className="p-4 border-t border-border-light bg-white shrink-0">
             {!pendingAction ? (
-              <div className="flex items-center gap-2">
-                <input type="text" value={input} onChange={(e) => setInput(e.target.value)}
+              <div className="flex items-center gap-3">
+                <input ref={inputRef} type="text" value={input} onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSend(input))}
                   placeholder="اكتب سؤالك أو طلبك..." disabled={loading || executing}
-                  className="flex-1 px-4 py-2.5 rounded-xl border border-border-light bg-gray-50 text-sm focus:outline-none focus:border-brand focus:bg-white transition-colors disabled:opacity-50" />
+                  className="flex-1 px-5 py-3.5 rounded-2xl border-2 border-border-light bg-gray-50 text-sm focus:outline-none focus:border-brand focus:bg-white transition-all disabled:opacity-50 placeholder:text-gray-400" />
                 <button onClick={() => handleSend(input)}
                   disabled={!input.trim() || loading || executing}
-                  className="p-2.5 rounded-xl bg-brand text-white hover:bg-brand-dark disabled:opacity-50 transition-colors shadow-sm">
-                  <Send size={18} />
+                  className="p-3.5 rounded-2xl bg-brand text-white hover:bg-brand-dark disabled:opacity-50 transition-all shadow-sm shrink-0">
+                  <Send size={20} />
                 </button>
               </div>
             ) : (
-              <div className="text-center text-xs text-text-muted py-1">قم بالتأكيد أو الإلغاء أعلاه</div>
+              <div className="text-center text-sm text-text-muted py-2">
+                قم بتأكيد أو إلغاء الإجراء المقترح أعلاه
+              </div>
             )}
           </div>
         </div>
