@@ -54,9 +54,9 @@ export default function ReportsPage() {
       </div>
 
       <div className="bg-white rounded-2xl border border-border-light p-6">
-        <h3 className="font-bold text-text-primary mb-4">ملخص الوظائف</h3>
+        <h3 className="font-bold text-text-primary mb-4">ملخص الفرص</h3>
         {jobs.length === 0 ? (
-          <p className="text-sm text-text-secondary">لم تنشر أي وظيفة بعد.</p>
+          <p className="text-sm text-text-secondary">لم تنشر أي فرصة بعد.</p>
         ) : (
           <div className="space-y-3">
             {jobs.map((job) => (

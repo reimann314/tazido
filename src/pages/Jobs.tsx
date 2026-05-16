@@ -22,8 +22,8 @@ export default function Jobs() {
   return (
     <div className="min-h-screen pt-[72px] bg-surface">
       <div className="container-main py-12 md:py-16">
-        <SEO title="الوظائف المتاحة" description="تصفّح أحدث الفرص التدريبية والوظيفية للطلاب في السعودية. قدّم مباشرة على وظائف تناسب تخصصك." />
-        <h1 className="text-h2 mb-2">الوظائف المتاحة</h1>
+        <SEO title="الفرص المتاحة" description="تصفّح أحدث الفرص التدريبية والمهنية للطلاب في السعودية. قدّم مباشرة على فرص تناسب تخصصك." />
+        <h1 className="text-h2 mb-2">الفرص المتاحة</h1>
         <p className="text-text-secondary mb-8">تصفّح أحدث الفرص وقدّم مباشرة.</p>
 
         <div className="flex flex-wrap gap-2 mb-8">

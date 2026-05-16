@@ -15,16 +15,16 @@ export default function StudentApplications() {
   return (
     <div>
       <h1 className="text-h2 mb-2">طلباتي</h1>
-      <p className="text-text-secondary mb-8">تتبع حالة طلباتك المقدمة على الوظائف.</p>
+      <p className="text-text-secondary mb-8">تتبع حالة طلباتك المقدمة على الفرص.</p>
 
       <div className="bg-white rounded-2xl border border-border-light overflow-hidden">
         {myApps === undefined ? (
           <TableSkeleton rows={3} />
         ) : myApps.length === 0 ? (
           <div className="p-12 text-center">
-            <p className="text-text-secondary mb-4">لم تتقدّم لأي وظيفة بعد.</p>
+            <p className="text-text-secondary mb-4">لم تتقدّم لأي فرصة بعد.</p>
             <Link to="/jobs" className="btn-primary inline-flex">
-              تصفح الوظائف
+              تصفح الفرص
             </Link>
           </div>
         ) : (
@@ -32,7 +32,7 @@ export default function StudentApplications() {
             <table className="w-full text-sm">
               <thead className="bg-surface text-text-secondary">
                 <tr>
-                  <th className="text-right px-4 py-3 font-medium">الوظيفة</th>
+                  <th className="text-right px-4 py-3 font-medium">الفرصة</th>
                   <th className="text-right px-4 py-3 font-medium">الشركة</th>
                   <th className="text-right px-4 py-3 font-medium">تاريخ التقديم</th>
                   <th className="text-right px-4 py-3 font-medium">الحالة</th>

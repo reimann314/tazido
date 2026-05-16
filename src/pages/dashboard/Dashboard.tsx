@@ -24,7 +24,7 @@ import OffersPage from "./OffersPage";
 import CompanyMembers from "./CompanyMembers";
 import ProgramsPage from "./ProgramsPage";
 
-type Page = "dashboard" | "entity-profile" | "student-folder" | "applications" | "candidates" | "student-search" | "shortlists" | "messages" | "interviews" | "offers" | "programs" | "reports" | "team" | "members" | "career" | "skills" | "settings";
+type Page = "dashboard" | "entity-profile" | "student-folder" | "applications" | "candidates" | "student-search" | "shortlists" | "messages" | "interviews" | "offers" | "programs" | "reports" | "team" | "members" | "career" | "skills" | "settings" | "browse";
 
 type NavItem = {
   label: string;
@@ -57,8 +57,8 @@ export default function Dashboard() {
   ];
 
   const studentLinks: NavItem[] = [
-    { label: "الرئيسية", key: "dashboard", icon: <LayoutDashboard size={20} /> },
-    { label: "الملف الشخصي", key: "student-folder", icon: <FolderOpen size={20} /> },
+    { label: "الفرص المقترحة", key: "dashboard", icon: <LayoutDashboard size={20} /> },
+    { label: "تصفح الفرص", key: "browse", icon: <Briefcase size={20} /> },
     { label: "طلباتي", key: "applications", icon: <FileText size={20} /> },
     { label: "الرسائل", key: "messages", icon: <MessageCircle size={20} /> },
     { label: "المقابلات", key: "interviews", icon: <Calendar size={20} /> },
@@ -73,6 +73,11 @@ export default function Dashboard() {
 
   const handleNavClick = (item: NavItem) => {
     if (item.comingSoon) return;
+    if (item.key === "browse") {
+      setSidebarOpen(false);
+      window.location.href = "/jobs";
+      return;
+    }
     setCurrentPage(item.key);
     setSidebarOpen(false);
   };
@@ -171,22 +176,12 @@ export default function Dashboard() {
       </nav>
 
       <div className="px-3 pb-1 space-y-1">
-        {isStudent && (
-          <Link
-            to="/jobs"
-            onClick={() => setSidebarOpen(false)}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-text-secondary hover:bg-surface hover:text-text-primary"
-          >
-            <span className="text-brand/70"><Briefcase size={20} /></span>
-            <span>تصفح الوظائف</span>
-          </Link>
-        )}
         <button
           onClick={handleBackToDashboard}
           className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-text-secondary hover:bg-surface hover:text-text-primary"
         >
-          <span className="text-brand/70"><Briefcase size={20} /></span>
-          <span>{isStudent ? "الرئيسية" : "وظائفي"}</span>
+          <span className="text-brand/70"><LayoutDashboard size={20} /></span>
+          <span>{isStudent ? "الفرص المقترحة" : "فرصي"}</span>
         </button>
       </div>
 

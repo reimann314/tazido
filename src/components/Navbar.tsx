@@ -42,7 +42,6 @@ export default function Navbar() {
 
   const navLinks = [
     { label: "الرئيسية", href: "/" },
-    { label: "الوظائف", href: "/jobs" },
     { label: "كيف نعمل", href: "/how-it-works" },
     { label: "للشركات", href: "/for-companies" },
     { label: "للطلاب", href: "/for-talent" },
@@ -84,6 +83,14 @@ export default function Navbar() {
           {me ? (
             <>
               <NotificationsBell />
+              <Link
+                to="/jobs"
+                className={`text-sm font-medium transition-colors duration-300 ${
+                  scrolled || !isHome ? "text-text-primary hover:text-brand" : "text-white/90 hover:text-white"
+                }`}
+              >
+                الفرص
+              </Link>
               <Link
                 to="/dashboard"
                 className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ${
@@ -176,6 +183,13 @@ export default function Navbar() {
                   </div>
                   <NotificationsBell />
                 </div>
+                <Link
+                  to="/jobs"
+                  onClick={() => setMobileOpen(false)}
+                  className="block w-full text-center px-5 py-3 rounded-full border-2 border-brand text-brand text-sm font-medium hover:bg-brand hover:text-white transition-all"
+                >
+                  الفرص
+                </Link>
                 <Link
                   to="/dashboard"
                   onClick={() => setMobileOpen(false)}

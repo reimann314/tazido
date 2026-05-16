@@ -27,7 +27,7 @@ export default function StudentDashboard({ me }: { me: Me }) {
 
       <section className="mb-12">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-h3">وظائف مقترحة</h2>
+          <h2 className="text-h3">الفرص المقترحة</h2>
           <Link to="/jobs" className="text-sm text-brand font-medium">
             عرض الكل
           </Link>
@@ -39,7 +39,7 @@ export default function StudentDashboard({ me }: { me: Me }) {
             ))}
           </div>
         ) : recommended.length === 0 ? (
-          <p className="text-text-secondary">لا توجد وظائف حالياً.</p>
+          <p className="text-text-secondary">لا توجد فرص حالياً.</p>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {recommended.map((job) => (
@@ -74,13 +74,13 @@ export default function StudentDashboard({ me }: { me: Me }) {
         {myApps === undefined ? (
           <TableSkeleton rows={3} />
         ) : myApps.length === 0 ? (
-          <p className="text-text-secondary p-6 bg-white rounded-2xl border border-border-light">لم تتقدّم لأي وظيفة بعد.</p>
+          <p className="text-text-secondary p-6 bg-white rounded-2xl border border-border-light">لم تتقدّم لأي فرصة بعد.</p>
         ) : (
           <div className="bg-white rounded-2xl border border-border-light overflow-hidden">
             <table className="w-full text-sm">
               <thead className="bg-surface text-text-secondary">
                 <tr>
-                  <th className="text-right px-4 py-3 font-medium">الوظيفة</th>
+                  <th className="text-right px-4 py-3 font-medium">الفرصة</th>
                   <th className="text-right px-4 py-3 font-medium">الشركة</th>
                   <th className="text-right px-4 py-3 font-medium">تاريخ التقديم</th>
                   <th className="text-right px-4 py-3 font-medium">الحالة</th>

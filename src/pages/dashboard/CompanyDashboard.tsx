@@ -31,21 +31,21 @@ export default function CompanyDashboard({ me }: { me: Me }) {
           onClick={() => setShowForm((v) => !v)}
           className="btn-primary"
         >
-          {showForm ? "إلغاء" : "نشر وظيفة"}
+          {showForm ? "إلغاء" : "نشر فرصة"}
         </button>
       </div>
-      <p className="text-text-secondary mb-10">أدِر وظائفك ومتقدّميك من مكان واحد.</p>
+      <p className="text-text-secondary mb-10">أدِر فرصك ومتقدّميك من مكان واحد.</p>
 
       {showForm && token && (
         <JobForm token={token} onDone={() => setShowForm(false)} />
       )}
 
       <section className="mt-8">
-        <h2 className="text-h3 mb-4">وظائفي</h2>
+        <h2 className="text-h3 mb-4">فرصي</h2>
         {jobs === undefined ? (
           <TableSkeleton rows={3} />
         ) : jobs.length === 0 ? (
-          <p className="text-text-secondary bg-white rounded-2xl border border-border-light p-6">لم تنشر أي وظيفة بعد.</p>
+          <p className="text-text-secondary bg-white rounded-2xl border border-border-light p-6">لم تنشر أي فرصة بعد.</p>
         ) : (
           <div className="space-y-3">
             {jobs.map((job) => (
@@ -127,7 +127,7 @@ function JobForm({ token, onDone }: { token: string; onDone: () => void }) {
         </select>
       </label>
       <button type="submit" disabled={submitting} className="btn-primary disabled:opacity-60">
-        {submitting ? "جاري النشر..." : "نشر الوظيفة"}
+        {submitting ? "جاري النشر..." : "نشر الفرصة"}
       </button>
     </form>
   );
