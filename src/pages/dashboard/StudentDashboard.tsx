@@ -14,7 +14,7 @@ type Me = {
 
 export default function StudentDashboard({ me }: { me: Me }) {
   const token = getToken() ?? undefined;
-  const recommended = useQuery(api.jobs.list, { paginationOpts: { numItems: 6, cursor: null } });
+  const recommended = useQuery(api.jobs.listSuggested, token ? { token, limit: 6 } : "skip");
   const myApps = useQuery(
     api.applications.listByStudent,
     token ? { token } : "skip",
@@ -38,11 +38,11 @@ export default function StudentDashboard({ me }: { me: Me }) {
               <CardSkeleton key={i} />
             ))}
           </div>
-        ) : recommended.page.length === 0 ? (
+        ) : recommended.length === 0 ? (
           <p className="text-text-secondary">لا توجد وظائف حالياً.</p>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {recommended.page.map((job) => (
+            {recommended.map((job) => (
               <Link
                 key={job._id}
                 to={`/jobs/${job._id}`}
@@ -56,6 +56,13 @@ export default function StudentDashboard({ me }: { me: Me }) {
                     {JOB_TYPE_LABELS[job.type]}
                   </span>
                 </div>
+                {job.matchScore > 0 && (
+                  <div className="mt-2">
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-medium border border-emerald-200">
+                      نسبة تطابق {Math.min(100, job.matchScore * 20)}%
+                    </span>
+                  </div>
+                )}
               </Link>
             ))}
           </div>

@@ -6,6 +6,7 @@ import { StatusBadge } from "../../components/StatusBadge";
 import { TableSkeleton } from "../../components/LoadingSkeletons";
 import { FileText, ExternalLink } from "lucide-react";
 import type { Id } from "../../../convex/_generated/dataModel";
+import StudentProfileView from "./StudentProfileView";
 
 type AppRow = {
   _id: Id<"applications">;
@@ -13,6 +14,7 @@ type AppRow = {
   studentEmail: string;
   jobTitle: string;
   jobId: Id<"jobs">;
+  studentId?: Id<"users">;
   cvUrl: string | null;
   status: "pending" | "reviewed" | "accepted" | "rejected";
 };
@@ -23,6 +25,16 @@ export default function CandidatesPage() {
   const allApps = useQuery(api.applications.listByCompany, token ? { token } : "skip");
   const setStatus = useMutation(api.applications.setStatus);
   const [selectedJob, setSelectedJob] = useState("");
+  const [selectedStudentId, setSelectedStudentId] = useState<Id<"users"> | null>(null);
+
+  if (selectedStudentId) {
+    return (
+      <StudentProfileView
+        studentId={selectedStudentId}
+        onBack={() => setSelectedStudentId(null)}
+      />
+    );
+  }
 
   if (!jobs || !allApps) {
     return <TableSkeleton rows={4} />;
@@ -83,7 +95,14 @@ export default function CandidatesPage() {
               <tbody>
                 {filtered.map((app: AppRow) => (
                   <tr key={app._id} className="border-t border-border-light">
-                    <td className="px-4 py-3 text-text-primary font-medium">{app.studentName}</td>
+                    <td className="px-4 py-3">
+                      <button
+                        onClick={() => app.studentId && setSelectedStudentId(app.studentId)}
+                        className="text-text-primary font-medium hover:text-brand transition-colors text-right"
+                      >
+                        {app.studentName}
+                      </button>
+                    </td>
                     <td className="px-4 py-3 text-text-secondary">{app.studentEmail}</td>
                     <td className="px-4 py-3 text-text-secondary">{app.jobTitle}</td>
                     <td className="px-4 py-3">

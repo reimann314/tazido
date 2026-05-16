@@ -4,7 +4,7 @@ import { useCurrentUser } from "../../lib/auth";
 import {
   LayoutDashboard, Briefcase, FileText, Settings,
   TrendingUp, Users, Award, PhoneCall, Building2, GraduationCap,
-  FolderOpen, X, Menu,
+  FolderOpen, X, Menu, Search, Bookmark,
 } from "lucide-react";
 import StudentDashboard from "./StudentDashboard";
 import CompanyDashboard from "./CompanyDashboard";
@@ -16,8 +16,10 @@ import SkillsPage from "./SkillsPage";
 import SettingsPage from "./SettingsPage";
 import CandidatesPage from "./CandidatesPage";
 import ReportsPage from "./ReportsPage";
+import StudentSearch from "./StudentSearch";
+import ShortlistsPage from "./ShortlistsPage";
 
-type Page = "dashboard" | "entity-profile" | "student-folder" | "applications" | "candidates" | "reports" | "team" | "career" | "skills" | "settings";
+type Page = "dashboard" | "entity-profile" | "student-folder" | "applications" | "candidates" | "student-search" | "shortlists" | "reports" | "team" | "career" | "skills" | "settings";
 
 type NavItem = {
   label: string;
@@ -46,7 +48,9 @@ export default function Dashboard() {
   const companyLinks: NavItem[] = [
     { label: "الرئيسية", key: "dashboard", icon: <LayoutDashboard size={20} /> },
     { label: "ملف المنشئة", key: "entity-profile", icon: <FolderOpen size={20} /> },
+    { label: "البحث عن طلاب", key: "student-search", icon: <Search size={20} /> },
     { label: "المرشحون", key: "candidates", icon: <Users size={20} /> },
+    { label: "القائمة المختصرة", key: "shortlists", icon: <Bookmark size={20} /> },
     { label: "التقارير", key: "reports", icon: <TrendingUp size={20} /> },
     { label: "فريق العمل", key: "team", icon: <Users size={20} />, comingSoon: true },
     { label: "الإعدادات", key: "settings", icon: <Settings size={20} /> },
@@ -83,6 +87,10 @@ export default function Dashboard() {
         return <CandidatesPage />;
       case "reports":
         return <ReportsPage />;
+      case "student-search":
+        return <StudentSearch />;
+      case "shortlists":
+        return <ShortlistsPage />;
       default:
         return isStudent ? <StudentDashboard me={me} /> : <CompanyDashboard me={me} />;
     }

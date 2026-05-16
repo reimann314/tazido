@@ -113,6 +113,47 @@ export const setStatus = mutation({
   },
 });
 
+export const listSuggested = query({
+  args: { token: v.string(), limit: v.optional(v.number()) },
+  handler: async (ctx, { token, limit }) => {
+    const user = await getUserFromToken(ctx, token);
+    if (user.role !== "student") return [];
+    const take = limit ?? 50;
+
+    const jobs = await ctx.db
+      .query("jobs")
+      .withIndex("by_status", (q) => q.eq("status", "open"))
+      .order("desc")
+      .take(take);
+
+    const studentSpec = (user.specialization || "").toLowerCase();
+    const studentSkills = (user.skills || "").split(/[،,]/).map((s) => s.trim().toLowerCase()).filter(Boolean);
+
+    const scored = await Promise.all(
+      jobs.map(async (job) => {
+        const company = await ctx.db.get(job.companyId);
+        const title = job.title.toLowerCase();
+        const desc = job.description.toLowerCase();
+        let score = 0;
+        if (studentSpec && (title.includes(studentSpec) || desc.includes(studentSpec))) {
+          score += 3;
+        }
+        for (const skill of studentSkills) {
+          if (title.includes(skill) || desc.includes(skill)) score += 1;
+        }
+        return {
+          ...job,
+          companyName: company?.companyName ?? "شركة",
+          companyVerified: company?.verified === true,
+          matchScore: score,
+        };
+      }),
+    );
+
+    return scored.sort((a, b) => b.matchScore - a.matchScore);
+  },
+});
+
 // Used by student dashboard to know which jobs they already applied to.
 export const myApplicationJobIds = query({
   args: { token: v.string() },

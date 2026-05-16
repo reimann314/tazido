@@ -119,4 +119,13 @@ export default defineSchema({
     .index("by_student_and_job", ["studentId", "jobId"]),
 
   stats: defineTable(counterValidator),
+
+  shortlists: defineTable({
+    companyId: v.id("users"),
+    studentId: v.id("users"),
+    note: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_company", ["companyId"])
+    .index("by_company_and_student", ["companyId", "studentId"]),
 });

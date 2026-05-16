@@ -139,6 +139,7 @@ export const listByCompany = query({
           jobTitle: job.title,
           studentName: student?.name ?? "—",
           studentEmail: student?.email ?? "",
+          studentId: student?._id,
           cvUrl,
         });
       }

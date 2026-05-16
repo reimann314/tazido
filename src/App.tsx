@@ -11,6 +11,7 @@ import About from "./pages/About";
 import Auth from "./pages/Auth";
 import Jobs from "./pages/Jobs";
 import JobDetail from "./pages/JobDetail";
+import CompanyProfile from "./pages/CompanyProfile";
 import Dashboard from "./pages/dashboard/Dashboard";
 import VerifyEmail from "./pages/VerifyEmail";
 import ResetPassword from "./pages/ResetPassword";
@@ -65,6 +66,7 @@ function PublicApp() {
           <Route path="/login" element={<RedirectIfAuth><Auth /></RedirectIfAuth>} />
           <Route path="/jobs" element={<Jobs />} />
           <Route path="/jobs/:id" element={<JobDetail />} />
+          <Route path="/companies/:companyId" element={<CompanyProfile />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/terms" element={<Terms />} />

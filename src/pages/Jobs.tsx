@@ -70,7 +70,11 @@ export default function Jobs() {
                     {JOB_TYPE_LABELS[job.type]}
                   </span>
                 </div>
-                <p className="text-sm text-text-secondary mb-1">{job.companyName}</p>
+                <p className="text-sm text-text-secondary mb-1">
+                  <Link to={`/companies/${(job as any).companyId}`} onClick={(e) => e.stopPropagation()} className="hover:text-brand transition-colors">
+                    {job.companyName}
+                  </Link>
+                </p>
                 <p className="text-sm text-text-secondary">{job.location}</p>
               </Link>
             ))}
