@@ -4,7 +4,7 @@ import { useCurrentUser } from "../../lib/auth";
 import {
   LayoutDashboard, Briefcase, FileText, Settings,
   TrendingUp, Users, Award, PhoneCall, Building2, GraduationCap,
-  FolderOpen, X, Menu, Search, Bookmark,
+  FolderOpen, X, Menu, Search, Bookmark, MessageCircle, Calendar,
 } from "lucide-react";
 import StudentDashboard from "./StudentDashboard";
 import CompanyDashboard from "./CompanyDashboard";
@@ -18,8 +18,11 @@ import CandidatesPage from "./CandidatesPage";
 import ReportsPage from "./ReportsPage";
 import StudentSearch from "./StudentSearch";
 import ShortlistsPage from "./ShortlistsPage";
+import MessagesPage from "./MessagesPage";
+import InterviewsPage from "./InterviewsPage";
+import OffersPage from "./OffersPage";
 
-type Page = "dashboard" | "entity-profile" | "student-folder" | "applications" | "candidates" | "student-search" | "shortlists" | "reports" | "team" | "career" | "skills" | "settings";
+type Page = "dashboard" | "entity-profile" | "student-folder" | "applications" | "candidates" | "student-search" | "shortlists" | "messages" | "interviews" | "offers" | "reports" | "team" | "career" | "skills" | "settings";
 
 type NavItem = {
   label: string;
@@ -36,23 +39,28 @@ export default function Dashboard() {
   const [currentPage, setCurrentPage] = useState<Page>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const studentLinks: NavItem[] = [
-    { label: "الرئيسية", key: "dashboard", icon: <LayoutDashboard size={20} /> },
-    { label: "الملف الشخصي", key: "student-folder", icon: <FolderOpen size={20} /> },
-    { label: "طلباتي", key: "applications", icon: <FileText size={20} /> },
-    { label: "المسار المهني", key: "career", icon: <TrendingUp size={20} /> },
-    { label: "المهارات والشهادات", key: "skills", icon: <Award size={20} /> },
-    { label: "الإعدادات", key: "settings", icon: <Settings size={20} /> },
-  ];
-
   const companyLinks: NavItem[] = [
     { label: "الرئيسية", key: "dashboard", icon: <LayoutDashboard size={20} /> },
     { label: "ملف المنشئة", key: "entity-profile", icon: <FolderOpen size={20} /> },
     { label: "البحث عن طلاب", key: "student-search", icon: <Search size={20} /> },
     { label: "المرشحون", key: "candidates", icon: <Users size={20} /> },
     { label: "القائمة المختصرة", key: "shortlists", icon: <Bookmark size={20} /> },
+    { label: "الرسائل", key: "messages", icon: <MessageCircle size={20} /> },
+    { label: "المقابلات", key: "interviews", icon: <Calendar size={20} /> },
+    { label: "عروض التوظيف", key: "offers", icon: <Briefcase size={20} /> },
     { label: "التقارير", key: "reports", icon: <TrendingUp size={20} /> },
-    { label: "فريق العمل", key: "team", icon: <Users size={20} />, comingSoon: true },
+    { label: "الإعدادات", key: "settings", icon: <Settings size={20} /> },
+  ];
+
+  const studentLinks: NavItem[] = [
+    { label: "الرئيسية", key: "dashboard", icon: <LayoutDashboard size={20} /> },
+    { label: "الملف الشخصي", key: "student-folder", icon: <FolderOpen size={20} /> },
+    { label: "طلباتي", key: "applications", icon: <FileText size={20} /> },
+    { label: "الرسائل", key: "messages", icon: <MessageCircle size={20} /> },
+    { label: "المقابلات", key: "interviews", icon: <Calendar size={20} /> },
+    { label: "عروضي", key: "offers", icon: <Briefcase size={20} /> },
+    { label: "المسار المهني", key: "career", icon: <TrendingUp size={20} /> },
+    { label: "المهارات والشهادات", key: "skills", icon: <Award size={20} /> },
     { label: "الإعدادات", key: "settings", icon: <Settings size={20} /> },
   ];
 
@@ -91,6 +99,12 @@ export default function Dashboard() {
         return <StudentSearch />;
       case "shortlists":
         return <ShortlistsPage />;
+      case "messages":
+        return <MessagesPage />;
+      case "interviews":
+        return <InterviewsPage />;
+      case "offers":
+        return <OffersPage />;
       default:
         return isStudent ? <StudentDashboard me={me} /> : <CompanyDashboard me={me} />;
     }

@@ -188,5 +188,34 @@ export const setStatus = mutation({
         body: bodies[status],
       });
     }
+
+    // Send email notification
+    if (status === "accepted" || status === "rejected") {
+      const student = await ctx.db.get(app.studentId);
+      const company = await ctx.db.get(user._id);
+      const apiKey = process.env.RESEND_API_KEY;
+      const from = process.env.RESEND_FROM ?? "Tazid <onboarding@resend.dev>";
+      if (apiKey && student?.email && company?.companyName) {
+        const subject = status === "accepted" ? "تهانينا! تم قبول طلبك" : "تحديث حالة طلبك";
+        const message = status === "accepted"
+          ? `تهانينا! تم قبول طلبك على وظيفة "${job.title}" في شركة ${company.companyName}. سنتواصل معك قريباً بخصوص الخطوات التالية.`
+          : `نأسف، لم يتم قبول طلبك على وظيفة "${job.title}" في شركة ${company.companyName}. نتمنى لك التوفيق في فرص أخرى.`;
+        try {
+          await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${apiKey}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              from,
+              to: student.email,
+              subject: subject + " – تزيد",
+              html: `<!DOCTYPE html><html dir="rtl"><head><meta charset="utf-8"></head><body style="font-family:Arial,sans-serif;background:#f5f5f5;padding:40px 20px;"><table align="center" style="max-width:600px;width:100%;background:white;border-radius:16px;"><tr><td style="background:linear-gradient(135deg,#1a3a3a,#2d6a5e);padding:30px;text-align:center;"><h1 style="color:white;margin:0;font-size:28px;">${subject}</h1></td></tr><tr><td style="padding:30px;"><p style="font-size:18px;color:#333;">مرحباً ${student.name || "عزيزي المستخدم"}،</p><p style="font-size:15px;color:#666;line-height:1.8;">${message}</p><hr style="border:none;border-top:1px solid #eee;margin:20px 0;"><p style="font-size:13px;color:#999;text-align:center;">© 2026 تزيد | جميع الحقوق محفوظة</p></td></tr></table></body></html>`,
+            }),
+          });
+        } catch { console.debug("email send failed"); }
+      }
+    }
   },
 });

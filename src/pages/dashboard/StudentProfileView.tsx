@@ -6,7 +6,7 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import {
   ArrowRight, User, Mail, Phone, CreditCard, GraduationCap, BookOpen,
   Star, Globe, Heart, Briefcase, Building2, FileText, ExternalLink,
-  Bookmark, Loader2,
+  Bookmark, Loader2, MessageCircle,
 } from "lucide-react";
 
 export default function StudentProfileView({
@@ -20,8 +20,12 @@ export default function StudentProfileView({
   const profile = useQuery(api.search.getStudentProfile, token ? { token, studentId } : "skip");
   const isShortlisted = useQuery(api.shortlists.isShortlisted, token ? { token, studentId } : "skip");
   const addToShortlist = useMutation(api.shortlists.add);
+  const createConversation = useMutation(api.conversations.getOrCreate);
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
+  const [messaging, setMessaging] = useState(false);
+  const [msgDone, setMsgDone] = useState(false);
+  const [showOfferForm, setShowOfferForm] = useState(false);
 
   if (!profile) {
     return (
@@ -78,7 +82,30 @@ export default function StudentProfileView({
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                onClick={async () => {
+                  setMessaging(true);
+                  try {
+                    await createConversation({ token, otherId: studentId });
+                    setMsgDone(true);
+                    setTimeout(() => setMsgDone(false), 2000);
+                  } catch { console.debug("create conversation error"); }
+                  setMessaging(false);
+                }}
+                disabled={messaging}
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 text-white text-sm font-medium hover:bg-white/25 disabled:opacity-60 transition-colors"
+              >
+                {messaging ? <Loader2 size={16} className="animate-spin" /> : <MessageCircle size={16} />}
+                <span>{msgDone ? "تم فتح المحادثة" : "رسالة"}</span>
+              </button>
+              <button
+                onClick={() => setShowOfferForm(true)}
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 text-white text-sm font-medium hover:bg-white/25 transition-colors"
+              >
+                <Briefcase size={16} />
+                <span>عرض توظيف</span>
+              </button>
               {profile.cvUrl && (
                 <a
                   href={profile.cvUrl}
@@ -87,14 +114,14 @@ export default function StudentProfileView({
                   className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 text-white text-sm font-medium hover:bg-white/25 transition-colors"
                 >
                   <FileText size={16} />
-                  <span>تحميل CV</span>
+                  <span>CV</span>
                   <ExternalLink size={14} />
                 </a>
               )}
               {isShortlisted || added ? (
                 <span className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-emerald-500/20 text-emerald-300 text-sm font-medium border border-emerald-500/30">
                   <Bookmark size={16} />
-                  في القائمة المختصرة
+                  في القائمة
                 </span>
               ) : (
                 <button
@@ -103,13 +130,21 @@ export default function StudentProfileView({
                   className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 text-white text-sm font-medium hover:bg-white/25 disabled:opacity-60 transition-colors"
                 >
                   {adding ? <Loader2 size={16} className="animate-spin" /> : <Bookmark size={16} />}
-                  <span>إضافة للقائمة</span>
+                  <span>حفظ</span>
                 </button>
               )}
             </div>
           </div>
         </div>
       </div>
+
+      {showOfferForm && (
+        <OfferForm
+          token={token}
+          studentId={studentId}
+          onDone={() => setShowOfferForm(false)}
+        />
+      )}
 
       <div className="grid sm:grid-cols-2 gap-4">
         {sections.map((section) => {
@@ -130,5 +165,63 @@ export default function StudentProfileView({
         })}
       </div>
     </div>
+  );
+}
+
+function OfferForm({ token, studentId, onDone }: { token: string; studentId: Id<"users">; onDone: () => void }) {
+  const createOffer = useMutation(api.offers.create);
+  const [title, setTitle] = useState("");
+  const [salary, setSalary] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [terms, setTerms] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setError(null);
+    try {
+      await createOffer({ token, studentId, title, salary: salary || undefined, startDate, terms });
+      onDone();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "حدث خطأ");
+    }
+    setSubmitting(false);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-border-light p-6 mb-8 space-y-4">
+      <h3 className="font-bold text-text-primary">عرض توظيف جديد</h3>
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">{error}</div>
+      )}
+      <div className="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-1.5 text-text-primary">المسمى الوظيفي *</label>
+          <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} required className="w-full px-4 py-2.5 rounded-xl border border-border-light bg-surface text-sm focus:outline-none focus:border-brand" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1.5 text-text-primary">الراتب</label>
+          <input type="text" value={salary} onChange={(e) => setSalary(e.target.value)} placeholder="اختياري" className="w-full px-4 py-2.5 rounded-xl border border-border-light bg-surface text-sm focus:outline-none focus:border-brand" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1.5 text-text-primary">تاريخ البداية *</label>
+          <input type="text" value={startDate} onChange={(e) => setStartDate(e.target.value)} placeholder="مثال: 2026-07-01" required className="w-full px-4 py-2.5 rounded-xl border border-border-light bg-surface text-sm focus:outline-none focus:border-brand" />
+        </div>
+      </div>
+      <div>
+        <label className="block text-sm font-medium mb-1.5 text-text-primary">تفاصيل العرض والشروط</label>
+        <textarea value={terms} onChange={(e) => setTerms(e.target.value)} rows={4} className="w-full px-4 py-2.5 rounded-xl border border-border-light bg-surface text-sm focus:outline-none focus:border-brand resize-none" />
+      </div>
+      <div className="flex items-center gap-3">
+        <button type="submit" disabled={submitting} className="px-6 py-2.5 rounded-xl bg-brand text-white text-sm font-medium hover:bg-brand-dark disabled:opacity-60 transition-all">
+          {submitting ? "جاري الإرسال..." : "إرسال العرض"}
+        </button>
+        <button type="button" onClick={onDone} className="px-6 py-2.5 rounded-xl border border-border-light text-text-secondary text-sm font-medium hover:bg-surface transition-all">
+          إلغاء
+        </button>
+      </div>
+    </form>
   );
 }

@@ -128,4 +128,62 @@ export default defineSchema({
   })
     .index("by_company", ["companyId"])
     .index("by_company_and_student", ["companyId", "studentId"]),
+
+  conversations: defineTable({
+    participants: v.array(v.id("users")),
+    jobId: v.optional(v.id("jobs")),
+    applicationId: v.optional(v.id("applications")),
+    lastMessageAt: v.optional(v.number()),
+    lastMessageBody: v.optional(v.string()),
+    lastMessageSender: v.optional(v.id("users")),
+    createdAt: v.number(),
+  }),
+
+  messages: defineTable({
+    conversationId: v.id("conversations"),
+    senderId: v.id("users"),
+    body: v.string(),
+    createdAt: v.number(),
+  })
+    .index("by_conversation", ["conversationId"]),
+
+  interviews: defineTable({
+    companyId: v.id("users"),
+    studentId: v.id("users"),
+    jobId: v.optional(v.id("jobs")),
+    applicationId: v.optional(v.id("applications")),
+    proposedSlots: v.array(v.number()),
+    selectedSlot: v.optional(v.number()),
+    status: v.union(
+      v.literal("pending"),
+      v.literal("confirmed"),
+      v.literal("cancelled"),
+      v.literal("completed"),
+    ),
+    notes: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_company", ["companyId"])
+    .index("by_student", ["studentId"]),
+
+  offers: defineTable({
+    companyId: v.id("users"),
+    studentId: v.id("users"),
+    jobId: v.optional(v.id("jobs")),
+    applicationId: v.optional(v.id("applications")),
+    title: v.string(),
+    salary: v.optional(v.string()),
+    startDate: v.string(),
+    terms: v.string(),
+    status: v.union(
+      v.literal("pending"),
+      v.literal("accepted"),
+      v.literal("rejected"),
+      v.literal("withdrawn"),
+    ),
+    createdAt: v.number(),
+    respondedAt: v.optional(v.number()),
+  })
+    .index("by_company", ["companyId"])
+    .index("by_student", ["studentId"]),
 });
