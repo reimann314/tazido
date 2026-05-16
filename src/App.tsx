@@ -4,6 +4,7 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import CookieConsent from "./components/CookieConsent";
 import AIAssistant from "./components/AIAssistant";
+import AnnouncementBanner from "./components/AnnouncementBanner";
 import Home from "./pages/Home";
 import HowItWorks from "./pages/HowItWorks";
 import ForCompanies from "./pages/ForCompanies";
@@ -56,6 +57,7 @@ function PublicApp() {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
+      <AnnouncementBanner />
       <div className="flex-1">
         <Routes>
           <Route path="/" element={<Home />} />

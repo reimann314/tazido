@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { MessageCircle, X, Send, Loader2, Sparkles } from "lucide-react";
+import { useCurrentUser } from "../lib/auth";
+import { X, Send, Loader2, Sparkles, LogIn } from "lucide-react";
 
 type Message = { role: "user" | "assistant"; text: string };
 
@@ -14,6 +16,8 @@ const suggestions = [
 
 export default function AIAssistant() {
   const ask = useAction(api.ai.askAssistant);
+  const me = useCurrentUser();
+  const isLoggedIn = me !== undefined && me !== null;
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     { role: "assistant", text: "مرحباً! أنا مساعد تزيد الذكي. كيف يمكنني مساعدتك؟" },
@@ -43,13 +47,14 @@ export default function AIAssistant() {
 
   return (
     <>
-      {/* Chat bubble button */}
+      {/* AI Assistant button */}
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          className="fixed bottom-6 left-6 z-40 w-14 h-14 rounded-full bg-brand text-white shadow-lg hover:bg-brand-dark transition-all flex items-center justify-center"
+          className="fixed bottom-6 left-6 z-40 flex items-center gap-2 px-4 py-3 rounded-full bg-brand text-white shadow-lg hover:bg-brand-dark transition-all"
         >
-          <MessageCircle size={24} />
+          <Sparkles size={18} />
+          <span className="text-sm font-semibold">AI Assistant</span>
         </button>
       )}
 
@@ -105,25 +110,35 @@ export default function AIAssistant() {
             </div>
           )}
 
-          {/* Input */}
+          {/* Input or login prompt */}
           <div className="p-3 border-t border-border-light bg-surface">
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSend(input)}
-                placeholder="اسأل عن المنصة..."
-                className="flex-1 px-4 py-2.5 rounded-xl border border-border-light bg-white text-sm focus:outline-none focus:border-brand"
-              />
-              <button
-                onClick={() => handleSend(input)}
-                disabled={!input.trim() || loading}
-                className="p-2.5 rounded-xl bg-brand text-white hover:bg-brand-dark disabled:opacity-50 transition-colors"
+            {isLoggedIn ? (
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSend(input)}
+                  placeholder="اسأل عن المنصة..."
+                  className="flex-1 px-4 py-2.5 rounded-xl border border-border-light bg-white text-sm focus:outline-none focus:border-brand"
+                />
+                <button
+                  onClick={() => handleSend(input)}
+                  disabled={!input.trim() || loading}
+                  className="p-2.5 rounded-xl bg-brand text-white hover:bg-brand-dark disabled:opacity-50 transition-colors"
+                >
+                  <Send size={18} />
+                </button>
+              </div>
+            ) : (
+              <Link
+                to="/login"
+                className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-brand text-white text-sm font-medium hover:bg-brand-dark transition-all"
               >
-                <Send size={18} />
-              </button>
-            </div>
+                <LogIn size={16} />
+                <span>سجّل دخولك لاستخدام المساعد الذكي</span>
+              </Link>
+            )}
           </div>
         </div>
       )}
