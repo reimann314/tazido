@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { internal } from "./_generated/api";
-import { requireRole } from "./sessionHelpers";
+import { requireRole, getEffectiveCompanyId } from "./sessionHelpers";
 
 const statusValidator = v.union(
   v.literal("pending"),
@@ -80,9 +80,10 @@ export const listByJob = query({
   args: { token: v.string(), jobId: v.id("jobs") },
   handler: async (ctx, { token, jobId }) => {
     const user = await requireRole(ctx, token, "company");
+    const companyId = getEffectiveCompanyId(user);
     const job = await ctx.db.get(jobId);
     if (!job) throw new Error("الوظيفة غير موجودة");
-    if (job.companyId !== user._id) throw new Error("غير مصرّح");
+    if (job.companyId !== companyId) throw new Error("غير مصرّح");
 
     const apps = await ctx.db
       .query("applications")
@@ -115,9 +116,10 @@ export const listByCompany = query({
   args: { token: v.string() },
   handler: async (ctx, { token }) => {
     const user = await requireRole(ctx, token, "company");
+    const companyId = getEffectiveCompanyId(user);
     const jobs = await ctx.db
       .query("jobs")
-      .withIndex("by_company", (q) => q.eq("companyId", user._id))
+      .withIndex("by_company", (q) => q.eq("companyId", companyId))
       .collect();
     const allApps = [];
     for (const job of jobs) {
@@ -156,10 +158,11 @@ export const setStatus = mutation({
   },
   handler: async (ctx, { token, applicationId, status }) => {
     const user = await requireRole(ctx, token, "company");
+    const companyId = getEffectiveCompanyId(user);
     const app = await ctx.db.get(applicationId);
     if (!app) throw new Error("الطلب غير موجود");
     const job = await ctx.db.get(app.jobId);
-    if (!job || job.companyId !== user._id) throw new Error("غير مصرّح");
+    if (!job || job.companyId !== companyId) throw new Error("غير مصرّح");
     const wasPending = app.status === "pending";
     const nowPending = status === "pending";
     await ctx.db.patch(applicationId, { status });

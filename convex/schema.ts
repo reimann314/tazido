@@ -41,6 +41,7 @@ export default defineSchema({
     zakatCertificate: v.optional(v.string()),
     taxCertificate: v.optional(v.string()),
     contactNumber: v.optional(v.string()),
+    parentCompanyId: v.optional(v.id("users")),
     cvStorageId: v.optional(v.id("_storage")),
     emailVerified: v.optional(v.boolean()),
     verificationToken: v.optional(v.string()),
@@ -128,6 +129,27 @@ export default defineSchema({
   })
     .index("by_company", ["companyId"])
     .index("by_company_and_student", ["companyId", "studentId"]),
+
+  companyMembers: defineTable({
+    companyId: v.id("users"),
+    userId: v.id("users"),
+    role: v.union(v.literal("admin"), v.literal("hr"), v.literal("hiring_manager")),
+    addedBy: v.id("users"),
+    createdAt: v.number(),
+  })
+    .index("by_company", ["companyId"])
+    .index("by_user", ["userId"]),
+
+  candidateNotes: defineTable({
+    companyId: v.id("users"),
+    studentId: v.id("users"),
+    applicationId: v.optional(v.id("applications")),
+    authorId: v.id("users"),
+    note: v.string(),
+    createdAt: v.number(),
+  })
+    .index("by_application", ["applicationId"])
+    .index("by_company", ["companyId"]),
 
   conversations: defineTable({
     participants: v.array(v.id("users")),

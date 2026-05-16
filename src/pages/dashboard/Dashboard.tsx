@@ -4,7 +4,7 @@ import { useCurrentUser } from "../../lib/auth";
 import {
   LayoutDashboard, Briefcase, FileText, Settings,
   TrendingUp, Users, Award, PhoneCall, Building2, GraduationCap,
-  FolderOpen, X, Menu, Search, Bookmark, MessageCircle, Calendar,
+  FolderOpen, X, Menu,   Search, Bookmark, MessageCircle, Calendar, UserCog,
 } from "lucide-react";
 import StudentDashboard from "./StudentDashboard";
 import CompanyDashboard from "./CompanyDashboard";
@@ -21,8 +21,9 @@ import ShortlistsPage from "./ShortlistsPage";
 import MessagesPage from "./MessagesPage";
 import InterviewsPage from "./InterviewsPage";
 import OffersPage from "./OffersPage";
+import CompanyMembers from "./CompanyMembers";
 
-type Page = "dashboard" | "entity-profile" | "student-folder" | "applications" | "candidates" | "student-search" | "shortlists" | "messages" | "interviews" | "offers" | "reports" | "team" | "career" | "skills" | "settings";
+type Page = "dashboard" | "entity-profile" | "student-folder" | "applications" | "candidates" | "student-search" | "shortlists" | "messages" | "interviews" | "offers" | "reports" | "team" | "members" | "career" | "skills" | "settings";
 
 type NavItem = {
   label: string;
@@ -48,6 +49,7 @@ export default function Dashboard() {
     { label: "الرسائل", key: "messages", icon: <MessageCircle size={20} /> },
     { label: "المقابلات", key: "interviews", icon: <Calendar size={20} /> },
     { label: "عروض التوظيف", key: "offers", icon: <Briefcase size={20} /> },
+    { label: "فريق العمل", key: "members", icon: <UserCog size={20} /> },
     { label: "التقارير", key: "reports", icon: <TrendingUp size={20} /> },
     { label: "الإعدادات", key: "settings", icon: <Settings size={20} /> },
   ];
@@ -105,6 +107,8 @@ export default function Dashboard() {
         return <InterviewsPage />;
       case "offers":
         return <OffersPage />;
+      case "members":
+        return <CompanyMembers />;
       default:
         return isStudent ? <StudentDashboard me={me} /> : <CompanyDashboard me={me} />;
     }

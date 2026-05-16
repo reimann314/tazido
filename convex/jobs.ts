@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { paginationOptsValidator } from "convex/server";
-import { getUserFromToken, requireRole } from "./sessionHelpers";
+import { getUserFromToken, requireRole, getEffectiveCompanyId } from "./sessionHelpers";
 
 const jobTypeValidator = v.union(
   v.literal("internship"),
@@ -43,9 +43,10 @@ export const listByCompany = query({
   args: { token: v.string() },
   handler: async (ctx, { token }) => {
     const user = await requireRole(ctx, token, "company");
+    const companyId = getEffectiveCompanyId(user);
     const jobs = await ctx.db
       .query("jobs")
-      .withIndex("by_company", (q) => q.eq("companyId", user._id))
+      .withIndex("by_company", (q) => q.eq("companyId", companyId))
       .order("desc")
       .collect();
 
@@ -71,10 +72,11 @@ export const create = mutation({
   },
   handler: async (ctx, args) => {
     const user = await requireRole(ctx, args.token, "company");
+    const companyId = getEffectiveCompanyId(user);
     if (!args.title.trim()) throw new Error("العنوان مطلوب");
     if (!args.description.trim()) throw new Error("الوصف مطلوب");
     const jobId = await ctx.db.insert("jobs", {
-      companyId: user._id,
+      companyId,
       title: args.title.trim(),
       description: args.description.trim(),
       location: args.location.trim(),
@@ -98,9 +100,10 @@ export const setStatus = mutation({
   },
   handler: async (ctx, { token, jobId, status }) => {
     const user = await requireRole(ctx, token, "company");
+    const companyId = getEffectiveCompanyId(user);
     const job = await ctx.db.get(jobId);
     if (!job) throw new Error("الوظيفة غير موجودة");
-    if (job.companyId !== user._id) throw new Error("غير مصرّح");
+    if (job.companyId !== companyId) throw new Error("غير مصرّح");
     const wasOpen = job.status === "open";
     const nowOpen = status === "open";
     await ctx.db.patch(jobId, { status });

@@ -1,14 +1,15 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { requireRole } from "./sessionHelpers";
+import { requireRole, getEffectiveCompanyId } from "./sessionHelpers";
 
 export const list = query({
   args: { token: v.string() },
   handler: async (ctx, { token }) => {
     const user = await requireRole(ctx, token, "company");
+    const companyId = getEffectiveCompanyId(user);
     const items = await ctx.db
       .query("shortlists")
-      .withIndex("by_company", (q) => q.eq("companyId", user._id))
+      .withIndex("by_company", (q) => q.eq("companyId", companyId))
       .order("desc")
       .collect();
 
@@ -41,17 +42,18 @@ export const add = mutation({
   args: { token: v.string(), studentId: v.id("users"), note: v.optional(v.string()) },
   handler: async (ctx, { token, studentId, note }) => {
     const user = await requireRole(ctx, token, "company");
+    const companyId = getEffectiveCompanyId(user);
 
     const existing = await ctx.db
       .query("shortlists")
       .withIndex("by_company_and_student", (q) =>
-        q.eq("companyId", user._id).eq("studentId", studentId),
+        q.eq("companyId", companyId).eq("studentId", studentId),
       )
       .unique();
     if (existing) throw new Error("الطالب موجود بالفعل في القائمة المختصرة");
 
     return await ctx.db.insert("shortlists", {
-      companyId: user._id,
+      companyId,
       studentId,
       note,
       createdAt: Date.now(),
@@ -63,8 +65,9 @@ export const remove = mutation({
   args: { token: v.string(), shortlistId: v.id("shortlists") },
   handler: async (ctx, { token, shortlistId }) => {
     const user = await requireRole(ctx, token, "company");
+    const companyId = getEffectiveCompanyId(user);
     const item = await ctx.db.get(shortlistId);
-    if (!item || item.companyId !== user._id) throw new Error("غير مصرّح");
+    if (!item || item.companyId !== companyId) throw new Error("غير مصرّح");
     await ctx.db.delete(shortlistId);
   },
 });
@@ -73,10 +76,11 @@ export const isShortlisted = query({
   args: { token: v.string(), studentId: v.id("users") },
   handler: async (ctx, { token, studentId }) => {
     const user = await requireRole(ctx, token, "company");
+    const companyId = getEffectiveCompanyId(user);
     const item = await ctx.db
       .query("shortlists")
       .withIndex("by_company_and_student", (q) =>
-        q.eq("companyId", user._id).eq("studentId", studentId),
+        q.eq("companyId", companyId).eq("studentId", studentId),
       )
       .unique();
     return item !== null;

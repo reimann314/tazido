@@ -1,14 +1,15 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { requireRole } from "./sessionHelpers";
+import { requireRole, getEffectiveCompanyId } from "./sessionHelpers";
 
 export const listByCompany = query({
   args: { token: v.string() },
   handler: async (ctx, { token }) => {
     const user = await requireRole(ctx, token, "company");
+    const companyId = getEffectiveCompanyId(user);
     const items = await ctx.db
       .query("offers")
-      .withIndex("by_company", (q) => q.eq("companyId", user._id))
+      .withIndex("by_company", (q) => q.eq("companyId", companyId))
       .order("desc")
       .collect();
 
@@ -53,11 +54,12 @@ export const create = mutation({
   },
   handler: async (ctx, { token, studentId, title, salary, startDate, terms, jobId, applicationId }) => {
     const user = await requireRole(ctx, token, "company");
+    const companyId = getEffectiveCompanyId(user);
     if (!title.trim()) throw new Error("العنوان مطلوب");
     if (!startDate.trim()) throw new Error("تاريخ البداية مطلوب");
 
     return await ctx.db.insert("offers", {
-      companyId: user._id,
+      companyId,
       studentId,
       jobId,
       applicationId,
@@ -94,8 +96,9 @@ export const withdraw = mutation({
   args: { token: v.string(), offerId: v.id("offers") },
   handler: async (ctx, { token, offerId }) => {
     const user = await requireRole(ctx, token, "company");
+    const companyId = getEffectiveCompanyId(user);
     const offer = await ctx.db.get(offerId);
-    if (!offer || offer.companyId !== user._id) throw new Error("غير مصرّح");
+    if (!offer || offer.companyId !== companyId) throw new Error("غير مصرّح");
     await ctx.db.patch(offerId, { status: "withdrawn" });
   },
 });

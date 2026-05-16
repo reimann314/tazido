@@ -11,6 +11,8 @@
 import type * as admin from "../admin.js";
 import type * as applications from "../applications.js";
 import type * as auth from "../auth.js";
+import type * as candidateNotes from "../candidateNotes.js";
+import type * as companyMembers from "../companyMembers.js";
 import type * as conversations from "../conversations.js";
 import type * as cv from "../cv.js";
 import type * as http from "../http.js";
@@ -36,6 +38,8 @@ declare const fullApi: ApiFromModules<{
   admin: typeof admin;
   applications: typeof applications;
   auth: typeof auth;
+  candidateNotes: typeof candidateNotes;
+  companyMembers: typeof companyMembers;
   conversations: typeof conversations;
   cv: typeof cv;
   http: typeof http;

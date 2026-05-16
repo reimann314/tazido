@@ -1,14 +1,15 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { getUserFromToken, requireRole } from "./sessionHelpers";
+import { getUserFromToken, requireRole, getEffectiveCompanyId } from "./sessionHelpers";
 
 export const listByCompany = query({
   args: { token: v.string() },
   handler: async (ctx, { token }) => {
     const user = await requireRole(ctx, token, "company");
+    const companyId = getEffectiveCompanyId(user);
     const items = await ctx.db
       .query("interviews")
-      .withIndex("by_company", (q) => q.eq("companyId", user._id))
+      .withIndex("by_company", (q) => q.eq("companyId", companyId))
       .order("desc")
       .collect();
 
@@ -53,11 +54,12 @@ export const create = mutation({
   },
   handler: async (ctx, { token, studentId, slot1, slot2, slot3, jobId, applicationId, notes }) => {
     const user = await requireRole(ctx, token, "company");
+    const companyId = getEffectiveCompanyId(user);
     const slots = [slot1, slot2];
     if (slot3) slots.push(slot3);
 
     return await ctx.db.insert("interviews", {
-      companyId: user._id,
+      companyId,
       studentId,
       jobId,
       applicationId,

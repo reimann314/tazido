@@ -1,5 +1,5 @@
 import type { QueryCtx, MutationCtx } from "./_generated/server";
-import type { Doc } from "./_generated/dataModel";
+import type { Doc, Id } from "./_generated/dataModel";
 
 export async function getUserFromToken(
   ctx: QueryCtx | MutationCtx,
@@ -27,4 +27,8 @@ export async function requireRole(
     throw new Error("هذه العملية غير متاحة لحسابك");
   }
   return user;
+}
+
+export function getEffectiveCompanyId(user: Doc<"users">): Id<"users"> {
+  return (user.parentCompanyId ?? user._id) as Id<"users">;
 }
