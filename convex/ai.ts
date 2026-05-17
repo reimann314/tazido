@@ -1,8 +1,8 @@
 import { v } from "convex/values";
 import { action } from "./_generated/server";
 
-const API_URL = "https://api.groq.com/openai/v1/chat/completions";
-const MODEL = "llama-3.3-70b-versatile";
+const API_URL = "https://api.deepseek.com/v1/chat/completions";
+const MODEL = "deepseek-v4-flash";
 
 async function callAI(systemPrompt: string, userPrompt: string): Promise<string> {
   const apiKey = process.env.GEMINI_API_KEY;

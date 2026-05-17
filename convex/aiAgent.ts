@@ -3,8 +3,8 @@ import { v } from "convex/values";
 import { action } from "./_generated/server";
 import { api, internal } from "./_generated/api";
 
-const API_URL = "https://api.groq.com/openai/v1/chat/completions";
-const MODEL = "llama-3.3-70b-versatile";
+const API_URL = "https://api.deepseek.com/v1/chat/completions";
+const MODEL = "deepseek-chat"; // non-thinking mode of deepseek-v4-flash (required for tool calls)
 
 const TOOLS = [
   {
