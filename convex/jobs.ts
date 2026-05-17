@@ -102,6 +102,11 @@ export const create = mutation({
       open: status === "open",
     });
 
+    await ctx.runMutation(internal.audit._log, {
+      userId: user._id, action: "create_opportunity", resourceType: "job", resourceId: jobId,
+      details: `العنوان: ${args.title.trim()}, الحالة: ${status}`,
+    });
+
     return { jobId, status, message: profileComplete
       ? "تم نشر الفرصة بنجاح!"
       : "تم إرسال الفرصة للمراجعة. سيتم نشرها بعد موافقة الإدارة." };

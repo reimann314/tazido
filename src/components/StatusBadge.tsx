@@ -18,7 +18,7 @@ const APP_COLORS: Record<AppStatus, string> = {
 const JOB_LABELS: Record<JobStatus, string> = {
   open: "مفتوحة",
   closed: "مغلقة",
-  pending_approval: "قيد المراجعة",
+  pending_approval: "بانتظار الموافقة",
 };
 
 const JOB_COLORS: Record<JobStatus, string> = {

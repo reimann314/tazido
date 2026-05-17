@@ -14,7 +14,6 @@ export default function Navbar() {
     await authLogout();
     setMobileOpen(false);
     navigate("/");
-    window.location.reload();
   };
 
   const [scrolled, setScrolled] = useState(false);

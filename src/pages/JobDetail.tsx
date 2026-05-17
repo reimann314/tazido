@@ -8,7 +8,7 @@ import { useCurrentUser, getToken } from "../lib/auth";
 import { JOB_TYPE_LABELS, StatusBadge } from "../components/StatusBadge";
 import { JobDetailSkeleton } from "../components/LoadingSkeletons";
 import SEO from "../components/SEO";
-import { Bookmark, BookmarkCheck } from "lucide-react";
+import { Bookmark, BookmarkCheck, Loader2 } from "lucide-react";
 
 export default function JobDetail() {
   const { id } = useParams<{ id: string }>();
@@ -100,7 +100,7 @@ export default function JobDetail() {
               disabled={withdrawing}
               className="px-3 py-1.5 rounded-lg border border-red-200 text-red-600 text-xs font-medium hover:bg-red-50 disabled:opacity-60 transition-colors"
             >
-              {withdrawing ? "..." : "إلغاء التقديم"}
+              {withdrawing ? <Loader2 size={14} className="animate-spin" /> : "إلغاء التقديم"}
             </button>
           )}
         </div>
@@ -121,7 +121,7 @@ export default function JobDetail() {
     <div className="min-h-screen pt-[72px] bg-surface">
       <SEO title={job.title} description={job.description?.slice(0, 160)} />
       <div className="container-main py-12 md:py-16">
-          <Link to="/jobs" className="text-sm text-brand mb-6 inline-block">← كل الفرص</Link>
+          <Link to="/jobs" className="text-sm text-brand mb-6 inline-flex items-center gap-1">→ كل الفرص</Link>
           <div className="bg-white rounded-3xl border border-border-light p-6 md:p-10 max-w-3xl">
             <div className="flex flex-wrap items-start justify-between gap-3 mb-2">
               <div className="flex items-center gap-3">

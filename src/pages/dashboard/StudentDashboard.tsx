@@ -8,6 +8,8 @@ import {
 } from "../../components/StatusBadge";
 import { CardSkeleton, TableSkeleton } from "../../components/LoadingSkeletons";
 
+const MATCH_SCORE_PER_POINT = 20; // matchScore range: 0-5, displayed as 0-100%
+
 type Me = {
   name?: string;
 };
@@ -59,7 +61,7 @@ export default function StudentDashboard({ me }: { me: Me }) {
                 {job.matchScore > 0 && (
                   <div className="mt-2">
                     <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-medium border border-emerald-200">
-                      نسبة تطابق {Math.min(100, job.matchScore * 20)}%
+                      نسبة تطابق {Math.min(100, job.matchScore * MATCH_SCORE_PER_POINT)}%
                     </span>
                   </div>
                 )}

@@ -38,6 +38,10 @@ export const apply = mutation({
       pending: true,
     });
 
+    await ctx.runMutation(internal.audit._log, {
+      userId: user._id, action: "apply", resourceType: "application", resourceId: appId,
+    });
+
     await ctx.runMutation(internal.notifications._create, {
       userId: job.companyId,
       type: "new_application",
@@ -242,5 +246,10 @@ export const setStatus = mutation({
         } catch { console.debug("email send failed"); }
       }
     }
+
+    await ctx.runMutation(internal.audit._log, {
+      userId: user._id, action: "update_application_status", resourceType: "application", resourceId: applicationId,
+      details: `الحالة الجديدة: ${status}`,
+    });
   },
 });

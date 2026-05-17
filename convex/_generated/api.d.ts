@@ -13,6 +13,7 @@ import type * as admin from "../admin.js";
 import type * as ai from "../ai.js";
 import type * as aiAgent from "../aiAgent.js";
 import type * as applications from "../applications.js";
+import type * as audit from "../audit.js";
 import type * as auth from "../auth.js";
 import type * as candidateNotes from "../candidateNotes.js";
 import type * as companyMembers from "../companyMembers.js";
@@ -47,6 +48,7 @@ declare const fullApi: ApiFromModules<{
   ai: typeof ai;
   aiAgent: typeof aiAgent;
   applications: typeof applications;
+  audit: typeof audit;
   auth: typeof auth;
   candidateNotes: typeof candidateNotes;
   companyMembers: typeof companyMembers;

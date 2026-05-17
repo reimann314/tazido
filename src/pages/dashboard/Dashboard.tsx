@@ -197,14 +197,14 @@ export default function Dashboard() {
       <div className="p-4 border-t border-border-light">
         <a
           href="tel:0554899033"
-          className="flex items-center gap-3 w-full px-4 py-3 rounded-xl bg-red-50 text-red-700 text-sm font-medium hover:bg-red-100"
+          className="flex items-center gap-3 w-full px-4 py-3 rounded-xl bg-surface text-text-secondary text-sm font-medium hover:bg-surface-pure transition-colors"
         >
-          <span className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-600 shrink-0">
+          <span className="w-8 h-8 rounded-full bg-brand/10 flex items-center justify-center text-brand shrink-0">
             <PhoneCall size={16} />
           </span>
           <div className="text-right">
-            <p className="font-semibold">طلب مساعدة عاجلة</p>
-            <p className="text-xs text-red-500" dir="ltr">0554899033</p>
+            <p className="font-semibold text-text-primary">الدعم الفني</p>
+            <p className="text-xs text-text-muted" dir="ltr">0554899033</p>
           </div>
         </a>
       </div>

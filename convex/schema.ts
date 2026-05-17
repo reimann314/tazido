@@ -260,6 +260,18 @@ export default defineSchema({
   })
     .index("by_approved", ["approved"]),
 
+  auditLogs: defineTable({
+    companyId: v.id("users"),
+    userId: v.id("users"),
+    action: v.string(),
+    resourceType: v.string(),
+    resourceId: v.string(),
+    details: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_company", ["companyId"])
+    .index("by_company_action", ["companyId", "action"]),
+
   savedJobs: defineTable({
     userId: v.id("users"),
     jobId: v.id("jobs"),

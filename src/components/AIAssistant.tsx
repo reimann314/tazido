@@ -64,6 +64,12 @@ export default function AIAssistant() {
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, pendingAction]);
   useEffect(() => { if (open && !loading) inputRef.current?.focus(); }, [open, loading]);
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [open]);
 
   const handleSend = async (text: string) => {
     if (!text.trim() || loading || !token) return;
@@ -116,7 +122,7 @@ export default function AIAssistant() {
         <button onClick={() => setOpen(true)}
           className="fixed bottom-6 left-6 z-40 flex items-center gap-3 px-5 py-3.5 rounded-2xl bg-gradient-to-l from-brand to-brand-light text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all border border-white/20">
           <Bot size={22} />
-          <span className="text-sm font-bold">AI Assistant</span>
+          <span className="text-sm font-bold">المساعد الذكي</span>
           <Sparkles size={14} className="text-gold/80" />
         </button>
       )}
@@ -134,8 +140,8 @@ export default function AIAssistant() {
                 <Bot size={20} />
               </span>
               <div>
-                <p className="font-bold text-base">AI Assistant</p>
-                <p className="text-[11px] text-white/70">مساعد تزيد الذكي — وكيل ذكي لتنفيذ المهام</p>
+                <p className="font-bold text-base">المساعد الذكي</p>
+                <p className="text-[11px] text-white/70">وكيل ذكي لتنفيذ المهام وإدارة المنصة</p>
               </div>
             </div>
             <div className="flex items-center gap-2">

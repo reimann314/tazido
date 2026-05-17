@@ -109,7 +109,7 @@ export default function Jobs() {
                   <div className="flex items-start justify-between gap-2 mb-3">
                     <h3 className="font-semibold text-text-primary flex-1">{job.title}</h3>
                     <button onClick={(e) => handleToggleSave(e, job._id, isSaved)}
-                      className="shrink-0 p-1.5 rounded-lg hover:bg-surface transition-colors opacity-0 group-hover:opacity-100">
+                      className="shrink-0 p-1.5 rounded-lg hover:bg-surface transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100">
                       {isSaved ? <BookmarkCheck size={16} className="text-brand" /> : <Bookmark size={16} className="text-text-muted" />}
                     </button>
                     {job.companyVerified && (
@@ -134,11 +134,12 @@ export default function Jobs() {
           </div>
         )}
 
-        {results.status === "CanLoadMore" && (
+        {(results.status === "CanLoadMore" || results.status === "LoadingMore") && (
           <div className="mt-10 text-center">
             <button onClick={() => results.loadMore(12)}
-              className="px-8 py-3 rounded-full bg-white border border-border-light text-text-secondary font-medium hover:border-brand/40 hover:text-brand transition-all">
-              عرض المزيد
+              disabled={results.status === "LoadingMore"}
+              className="px-8 py-3 rounded-full bg-white border border-border-light text-text-secondary font-medium hover:border-brand/40 hover:text-brand transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+              {results.status === "LoadingMore" ? "جاري التحميل..." : "عرض المزيد"}
             </button>
           </div>
         )}
