@@ -5,6 +5,7 @@ import { api } from "../../convex/_generated/api";
 import { useCurrentUser, getToken } from "../lib/auth";
 import {
   Send, Loader2, Bot, CheckCircle, XCircle, FileText, Search, Sparkles, PanelRightClose,
+  Briefcase, User, ClipboardList, BarChart3, Bookmark, Star, GraduationCap, SendHorizonal,
 } from "lucide-react";
 
 type Message = { role: "user" | "assistant"; text: string; type?: "text" | "success" | "error" };
@@ -24,11 +25,24 @@ function formatResponse(text: string): string {
 }
 
 function getIconForAction(name: string) {
-  switch (name) {
-    case "createOpportunity": return <FileText size={16} className="text-emerald-600" />;
-    case "searchStudents": return <Search size={16} className="text-blue-600" />;
-    default: return <Sparkles size={16} className="text-brand" />;
-  }
+  const icons: Record<string, [any, string]> = {
+    createOpportunity: [FileText, "text-emerald-600"],
+    searchStudents: [Search, "text-blue-600"],
+    getMyJobs: [Briefcase, "text-indigo-600"],
+    getApplications: [ClipboardList, "text-blue-600"],
+    getStudentProfile: [User, "text-purple-600"],
+    getMyApplications: [ClipboardList, "text-blue-600"],
+    getSuggestedJobs: [Sparkles, "text-amber-600"],
+    getStats: [BarChart3, "text-green-600"],
+    getShortlists: [Bookmark, "text-rose-600"],
+    sendMessageToStudent: [SendHorizonal, "text-cyan-600"],
+    addToShortlist: [Bookmark, "text-rose-600"],
+    applyToJob: [SendHorizonal, "text-cyan-600"],
+    createProgram: [GraduationCap, "text-violet-600"],
+    evaluateStudent: [Star, "text-amber-600"],
+  };
+  const [Icon, color] = icons[name] || [Sparkles, "text-brand"];
+  return <Icon size={16} className={color} />;
 }
 
 export default function AIAssistant() {
