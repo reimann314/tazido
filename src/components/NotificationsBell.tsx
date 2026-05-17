@@ -1,10 +1,29 @@
 import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { getToken } from "../lib/auth";
 import { Bell } from "lucide-react";
 
+function getNotificationTarget(type: string): string {
+  const map: Record<string, string> = {
+    new_message: "/dashboard?tab=messages",
+    interview_scheduled: "/dashboard?tab=interviews",
+    interview_confirmed: "/dashboard?tab=interviews",
+    interview_cancelled: "/dashboard?tab=interviews",
+    interview_reschedule: "/dashboard?tab=interviews",
+    interview_meeting: "/dashboard?tab=interviews",
+    offer_received: "/dashboard?tab=offers",
+    offer_response: "/dashboard?tab=offers",
+    application_status: "/dashboard?tab=applications",
+    application_withdrawn: "/dashboard?tab=applications",
+    new_application: "/dashboard?tab=candidates",
+  };
+  return map[type] || "/dashboard";
+}
+
 export default function NotificationsBell() {
+  const navigate = useNavigate();
   const token = getToken() ?? undefined;
   const notifications = useQuery(api.notifications.list, token ? { token } : "skip");
   const unreadCount = useQuery(api.notifications.unreadCount, token ? { token } : "skip");
@@ -66,7 +85,9 @@ export default function NotificationsBell() {
                 <button
                   key={n._id}
                   onClick={() => {
+                    setOpen(false);
                     if (!n.read && token) markRead({ token, notificationId: n._id });
+                    navigate(getNotificationTarget(n.type));
                   }}
                   className={`w-full text-right px-4 py-3 border-b border-border-light last:border-0 hover:bg-surface transition-colors ${
                     n.read ? "" : "bg-brand/[0.03]"

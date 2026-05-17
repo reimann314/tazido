@@ -334,16 +334,16 @@ function InterviewForm({ token, studentId, onDone }: { token: string; studentId:
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!slot1 || !slot2) { setError("الرجاء إدخال موعدين على الأقل"); return; }
+    if (!slot1) { setError("الرجاء إدخال موعد واحد على الأقل"); return; }
     const t1 = toTimestamp(slot1);
-    const t2 = toTimestamp(slot2);
-    if (isNaN(t1) || isNaN(t2)) { setError("صيغة التاريخ غير صحيحة"); return; }
+    if (isNaN(t1)) { setError("صيغة التاريخ غير صحيحة"); return; }
     setSubmitting(true);
     setError(null);
     try {
       await createInterview({
         token, studentId,
-        slot1: t1, slot2: t2,
+        slot1: t1,
+        slot2: slot2 ? toTimestamp(slot2) : undefined,
         slot3: slot3 ? toTimestamp(slot3) : undefined,
         notes: notes || undefined,
       });
@@ -358,7 +358,7 @@ function InterviewForm({ token, studentId, onDone }: { token: string; studentId:
     <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-border-light p-6 mb-8 space-y-4">
       <h3 className="font-bold text-text-primary">دعوة لمقابلة</h3>
       {error && <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">{error}</div>}
-      <p className="text-sm text-text-secondary">اختر موعدين أو ثلاثة مواعيد مقترحة. سيختار الطالب الأنسب له.</p>
+      <p className="text-sm text-text-secondary">اختر موعداً أو أكثر للمقابلة. سيختار الطالب الأنسب له.</p>
       <div className="grid sm:grid-cols-3 gap-4">
         <div>
           <label className="block text-sm font-medium mb-1.5 text-text-primary">الموعد الأول *</label>
@@ -369,7 +369,7 @@ function InterviewForm({ token, studentId, onDone }: { token: string; studentId:
           <input type="datetime-local" value={slot2} onChange={(e) => setSlot2(e.target.value)} required className="w-full px-4 py-2.5 rounded-xl border border-border-light bg-surface text-sm focus:outline-none focus:border-brand" />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1.5 text-text-primary">الموعد الثالث</label>
+          <label className="block text-sm font-medium mb-1.5 text-text-primary">الموعد الثالث (اختياري)</label>
           <input type="datetime-local" value={slot3} onChange={(e) => setSlot3(e.target.value)} className="w-full px-4 py-2.5 rounded-xl border border-border-light bg-surface text-sm focus:outline-none focus:border-brand" />
         </div>
       </div>

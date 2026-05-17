@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useCurrentUser } from "../../lib/auth";
 import {
   LayoutDashboard, Briefcase, FileText, Settings,
@@ -34,14 +34,33 @@ type NavItem = {
   comingSoon?: boolean;
 };
 
+const TAB_MAP: Record<string, Page> = {
+  messages: "messages",
+  interviews: "interviews",
+  offers: "offers",
+  applications: "applications",
+  candidates: "candidates",
+  programs: "programs",
+  settings: "settings",
+};
+
 export default function Dashboard() {
   const me = useCurrentUser();
   const navigate = useNavigate();
+  const [params] = useSearchParams();
   if (!me) return null;
 
   const isStudent = me.role === "student";
-  const [currentPage, setCurrentPage] = useState<Page>("dashboard");
+  const [currentPage, setCurrentPage] = useState<Page>(() => {
+    const tab = params.get("tab");
+    return (tab && TAB_MAP[tab]) || "dashboard";
+  });
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    const tab = params.get("tab");
+    if (tab && TAB_MAP[tab]) setCurrentPage(TAB_MAP[tab]);
+  }, [params]);
 
   const companyLinks: NavItem[] = [
     { label: "الرئيسية", key: "dashboard", icon: <LayoutDashboard size={20} /> },

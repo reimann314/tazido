@@ -47,7 +47,7 @@ export const create = mutation({
     token: v.string(),
     studentId: v.id("users"),
     slot1: v.number(),
-    slot2: v.number(),
+    slot2: v.optional(v.number()),
     slot3: v.optional(v.number()),
     jobId: v.optional(v.id("jobs")),
     applicationId: v.optional(v.id("applications")),
@@ -56,7 +56,8 @@ export const create = mutation({
   handler: async (ctx, { token, studentId, slot1, slot2, slot3, jobId, applicationId, notes }) => {
     const user = await requireRole(ctx, token, "company");
     const companyId = getEffectiveCompanyId(user);
-    const slots = [slot1, slot2];
+    const slots = [slot1];
+    if (slot2) slots.push(slot2);
     if (slot3) slots.push(slot3);
 
     const interviewId = await ctx.db.insert("interviews", {
@@ -126,6 +127,41 @@ export const setMeeting = mutation({
       type: "interview_meeting",
       title: "تم تحديد رابط المقابلة",
       body: "قامت الشركة بإضافة رابط المقابلة. يمكنك الآن الدخول في الموعد المحدد.",
+    });
+  },
+});
+
+export const requestReschedule = mutation({
+  args: {
+    token: v.string(),
+    interviewId: v.id("interviews"),
+    slot1: v.number(),
+    slot2: v.optional(v.number()),
+    slot3: v.optional(v.number()),
+    reason: v.optional(v.string()),
+  },
+  handler: async (ctx, { token, interviewId, slot1, slot2, slot3, reason }) => {
+    const user = await requireRole(ctx, token, "student");
+    const interview = await ctx.db.get(interviewId);
+    if (!interview || interview.studentId !== user._id) throw new Error("غير مصرّح");
+    if (interview.status !== "confirmed") throw new Error("لا يمكن طلب تغيير في هذه الحالة");
+
+    const slots = [slot1];
+    if (slot2) slots.push(slot2);
+    if (slot3) slots.push(slot3);
+
+    await ctx.db.patch(interviewId, {
+      proposedSlots: slots,
+      selectedSlot: undefined,
+      status: "pending",
+      notes: reason ? (interview.notes ? interview.notes + "\n---\nطلب تغيير: " + reason : "طلب تغيير: " + reason) : interview.notes,
+    });
+
+    await ctx.runMutation(internal.notifications._create, {
+      userId: interview.companyId,
+      type: "interview_reschedule",
+      title: "طلب تغيير موعد المقابلة",
+      body: "طلب الطالب تغيير موعد المقابلة واقترح مواعيد جديدة.",
     });
   },
 });

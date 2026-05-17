@@ -7,7 +7,7 @@ import { JOB_TYPE_LABELS } from "../components/StatusBadge";
 import { CardSkeleton } from "../components/LoadingSkeletons";
 import SEO from "../components/SEO";
 import { getToken } from "../lib/auth";
-import { Search, Bookmark, BookmarkCheck } from "lucide-react";
+import { Search, Bookmark, BookmarkCheck, LayoutDashboard } from "lucide-react";
 import type { Id } from "../../convex/_generated/dataModel";
 
 type JobType = "all" | "internship" | "full-time" | "part-time";
@@ -54,7 +54,15 @@ export default function Jobs() {
     <div className="min-h-screen pt-[72px] bg-surface">
       <div className="container-main py-12 md:py-16">
         <SEO title="الفرص المتاحة" description="تصفّح أحدث الفرص التدريبية والمهنية للطلاب في السعودية." />
-        <h1 className="text-h2 mb-2">الفرص المتاحة</h1>
+        <div className="flex items-center justify-between mb-2">
+          <h1 className="text-h2">الفرص المتاحة</h1>
+          {token && (
+            <Link to="/dashboard" className="flex items-center gap-2 px-4 py-2 rounded-xl bg-brand text-white text-sm font-medium hover:bg-brand-dark transition-all shrink-0">
+              <LayoutDashboard size={16} />
+              <span>العودة للوحة التحكم</span>
+            </Link>
+          )}
+        </div>
         <p className="text-text-secondary mb-8">تصفّح أحدث الفرص وقدّم مباشرة.</p>
 
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
