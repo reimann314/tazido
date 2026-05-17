@@ -259,4 +259,12 @@ export default defineSchema({
     createdAt: v.number(),
   })
     .index("by_approved", ["approved"]),
+
+  savedJobs: defineTable({
+    userId: v.id("users"),
+    jobId: v.id("jobs"),
+    createdAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_and_job", ["userId", "jobId"]),
 });

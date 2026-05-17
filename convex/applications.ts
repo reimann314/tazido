@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { internal } from "./_generated/api";
-import { requireRole, getEffectiveCompanyId } from "./sessionHelpers";
+import { getUserFromToken, requireRole, getEffectiveCompanyId } from "./sessionHelpers";
 
 const statusValidator = v.union(
   v.literal("pending"),
@@ -147,6 +147,28 @@ export const listByCompany = query({
       }
     }
     return allApps.sort((a, b) => b.appliedAt - a.appliedAt);
+  },
+});
+
+export const withdraw = mutation({
+  args: { token: v.string(), applicationId: v.id("applications") },
+  handler: async (ctx, { token, applicationId }) => {
+    const user = await getUserFromToken(ctx, token);
+    if (user.role !== "student") throw new Error("غير مصرّح");
+    const app = await ctx.db.get(applicationId);
+    if (!app || app.studentId !== user._id) throw new Error("غير مصرّح");
+    if (app.status !== "pending") throw new Error("لا يمكن إلغاء طلب تمت مراجعته");
+    await ctx.db.delete(applicationId);
+
+    const job = await ctx.db.get(app.jobId);
+    if (job && job.companyId) {
+      await ctx.runMutation(internal.notifications._create, {
+        userId: job.companyId,
+        type: "application_withdrawn",
+        title: "تم إلغاء تقديم",
+        body: "قام الطالب بإلغاء تقديمه على وظيفة " + job.title,
+      });
+    }
   },
 });
 

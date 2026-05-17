@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useMutation, useQuery } from "convex/react";
@@ -7,6 +8,7 @@ import { useCurrentUser, getToken } from "../lib/auth";
 import { JOB_TYPE_LABELS, StatusBadge } from "../components/StatusBadge";
 import { JobDetailSkeleton } from "../components/LoadingSkeletons";
 import SEO from "../components/SEO";
+import { Bookmark, BookmarkCheck } from "lucide-react";
 
 export default function JobDetail() {
   const { id } = useParams<{ id: string }>();
@@ -23,7 +25,15 @@ export default function JobDetail() {
     token && me?.role === "student" ? { token } : "skip",
   );
   const apply = useMutation(api.applications.apply);
+  const withdraw = useMutation(api.applications.withdraw);
+  const saveJob = useMutation(api.savedJobs.add);
+  const unsaveJob = useMutation(api.savedJobs.remove);
+  const isSavedQuery = useQuery(
+    api.savedJobs.isSaved,
+    token && me?.role === "student" ? { token, jobId } : "skip",
+  );
   const [submitting, setSubmitting] = useState(false);
+  const [withdrawing, setWithdrawing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   if (job === undefined) {
@@ -76,9 +86,23 @@ export default function JobDetail() {
     if (me.role === "company") return null;
     if (alreadyApplied) {
       return (
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <span className="text-text-secondary text-sm">حالة طلبك:</span>
           {myApp && <StatusBadge status={myApp.status} />}
+          {myApp?.status === "pending" && (
+            <button
+              onClick={async () => {
+                if (!token || !myApp) return;
+                setWithdrawing(true);
+                try { await withdraw({ token, applicationId: myApp._id }); } catch { console.debug("withdraw error"); }
+                setWithdrawing(false);
+              }}
+              disabled={withdrawing}
+              className="px-3 py-1.5 rounded-lg border border-red-200 text-red-600 text-xs font-medium hover:bg-red-50 disabled:opacity-60 transition-colors"
+            >
+              {withdrawing ? "..." : "إلغاء التقديم"}
+            </button>
+          )}
         </div>
       );
     }
@@ -97,14 +121,24 @@ export default function JobDetail() {
     <div className="min-h-screen pt-[72px] bg-surface">
       <SEO title={job.title} description={job.description?.slice(0, 160)} />
       <div className="container-main py-12 md:py-16">
-        <Link to="/jobs" className="text-sm text-brand mb-6 inline-block">← كل الفرص</Link>
-        <div className="bg-white rounded-3xl border border-border-light p-6 md:p-10 max-w-3xl">
-          <div className="flex flex-wrap items-start justify-between gap-3 mb-2">
-            <h1 className="text-h2">{job.title}</h1>
-            <span className="text-xs px-3 py-1.5 rounded-full bg-brand/5 text-brand">
-              {JOB_TYPE_LABELS[job.type]}
-            </span>
-          </div>
+          <Link to="/jobs" className="text-sm text-brand mb-6 inline-block">← كل الفرص</Link>
+          <div className="bg-white rounded-3xl border border-border-light p-6 md:p-10 max-w-3xl">
+            <div className="flex flex-wrap items-start justify-between gap-3 mb-2">
+              <div className="flex items-center gap-3">
+                <h1 className="text-h2">{job.title}</h1>
+                {(me as any)?.role === "student" && (
+                  <button onClick={async () => {
+                    if (isSavedQuery) await unsaveJob({ token: token!, jobId });
+                    else await saveJob({ token: token!, jobId });
+                  }} className="p-2 rounded-xl hover:bg-surface transition-colors">
+                    {isSavedQuery ? <BookmarkCheck size={20} className="text-brand" /> : <Bookmark size={20} className="text-text-muted" />}
+                  </button>
+                )}
+              </div>
+              <span className="text-xs px-3 py-1.5 rounded-full bg-brand/5 text-brand">
+                {JOB_TYPE_LABELS[job.type]}
+              </span>
+            </div>
           <p className="text-text-secondary mb-1 flex items-center gap-2">
             <Link to={`/companies/${(job as any).companyId}`} className="hover:text-brand transition-colors">
               {job.companyName}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
@@ -10,6 +10,7 @@ import {
 } from "../../components/StatusBadge";
 import { TableSkeleton } from "../../components/LoadingSkeletons";
 import DescriptionHelper from "../../components/DescriptionHelper";
+import { Pencil } from "lucide-react";
 
 type Me = { name?: string; companyName?: string };
 type JobType = "internship" | "full-time" | "part-time";
@@ -185,6 +186,28 @@ type JobRowProps = {
 
 function JobRow({ job, token, expanded, onToggle }: JobRowProps) {
   const setStatus = useMutation(api.jobs.setStatus);
+  const updateJob = useMutation(api.jobs.update);
+  const [editing, setEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState(job.title);
+  const [editDesc, setEditDesc] = useState("");
+  const [editLoc, setEditLoc] = useState(job.location);
+  const [editType, setEditType] = useState(job.type);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setEditTitle(job.title);
+    setEditLoc(job.location);
+    setEditType(job.type);
+  }, [job]);
+
+  const handleSaveEdit = async () => {
+    setSaving(true);
+    try {
+      await updateJob({ token, jobId: job._id, title: editTitle, description: editDesc, location: editLoc, type: editType });
+      setEditing(false);
+    } catch { console.debug("update error"); }
+    setSaving(false);
+  };
 
   return (
     <div className="bg-white rounded-2xl border border-border-light">
@@ -200,27 +223,41 @@ function JobRow({ job, token, expanded, onToggle }: JobRowProps) {
         </div>
         <div className="flex items-center gap-2">
           {job.status !== "pending_approval" && (
-            <button
-              onClick={() =>
-                setStatus({
-                  token,
-                  jobId: job._id,
-                  status: job.status === "open" ? "closed" : "open",
-                })
-              }
-              className="text-sm px-3 py-2 rounded-full border border-border-light hover:border-brand/40"
-            >
+            <button onClick={() => { setEditing(true); setEditDesc(""); }}
+              className="text-sm px-3 py-2 rounded-full border border-border-light hover:border-brand/40 flex items-center gap-1.5">
+              <Pencil size={14} />
+              <span>تعديل</span>
+            </button>
+          )}
+          {job.status !== "pending_approval" && (
+            <button onClick={() => setStatus({ token, jobId: job._id, status: job.status === "open" ? "closed" : "open" })}
+              className="text-sm px-3 py-2 rounded-full border border-border-light hover:border-brand/40">
               {job.status === "open" ? "إغلاق" : "إعادة فتح"}
             </button>
           )}
-          <button
-            onClick={onToggle}
-            className="text-sm px-3 py-2 rounded-full bg-brand text-white"
-          >
+          <button onClick={onToggle} className="text-sm px-3 py-2 rounded-full bg-brand text-white">
             {expanded ? "إخفاء" : "عرض المتقدّمين"}
           </button>
         </div>
       </div>
+      {editing && (
+        <div className="border-t border-border-light p-5 space-y-3 bg-surface">
+          <input type="text" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className="w-full px-4 py-2.5 rounded-xl border border-border-light bg-white text-sm focus:outline-none focus:border-brand" />
+          <textarea value={editDesc} onChange={(e) => setEditDesc(e.target.value)} rows={3} placeholder="الوصف (اترك فارغاً للاحتفاظ بالوصف الحالي)" className="w-full px-4 py-2.5 rounded-xl border border-border-light bg-white text-sm focus:outline-none focus:border-brand resize-none" />
+          <div className="flex gap-3">
+            <input type="text" value={editLoc} onChange={(e) => setEditLoc(e.target.value)} className="flex-1 px-4 py-2.5 rounded-xl border border-border-light bg-white text-sm focus:outline-none focus:border-brand" />
+            <select value={editType} onChange={(e) => setEditType(e.target.value as JobType)} className="px-4 py-2.5 rounded-xl border border-border-light bg-white text-sm focus:outline-none focus:border-brand">
+              <option value="internship">تدريب</option>
+              <option value="full-time">دوام كامل</option>
+              <option value="part-time">دوام جزئي</option>
+            </select>
+          </div>
+          <div className="flex gap-2">
+            <button onClick={handleSaveEdit} disabled={saving} className="px-5 py-2 rounded-xl bg-brand text-white text-sm font-medium hover:bg-brand-dark disabled:opacity-60">حفظ</button>
+            <button onClick={() => setEditing(false)} className="px-5 py-2 rounded-xl border border-border-light text-text-secondary text-sm font-medium hover:bg-surface">إلغاء</button>
+          </div>
+        </div>
+      )}
       {expanded && <Applicants jobId={job._id} token={token} />}
     </div>
   );

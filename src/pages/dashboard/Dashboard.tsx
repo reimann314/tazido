@@ -22,9 +22,10 @@ import MessagesPage from "./MessagesPage";
 import InterviewsPage from "./InterviewsPage";
 import OffersPage from "./OffersPage";
 import CompanyMembers from "./CompanyMembers";
+import SavedJobsPage from "./SavedJobsPage";
 import ProgramsPage from "./ProgramsPage";
 
-type Page = "dashboard" | "entity-profile" | "student-folder" | "applications" | "candidates" | "student-search" | "shortlists" | "messages" | "interviews" | "offers" | "programs" | "reports" | "team" | "members" | "career" | "skills" | "settings" | "browse";
+type Page = "dashboard" | "entity-profile" | "student-folder" | "applications" | "candidates" | "student-search" | "shortlists" | "messages" | "interviews" | "offers" | "programs" | "saved" | "reports" | "team" | "members" | "career" | "skills" | "settings" | "browse";
 
 type NavItem = {
   label: string;
@@ -60,6 +61,7 @@ export default function Dashboard() {
   const studentLinks: NavItem[] = [
     { label: "الفرص المقترحة", key: "dashboard", icon: <LayoutDashboard size={20} /> },
     { label: "تصفح الفرص", key: "browse", icon: <Briefcase size={20} /> },
+    { label: "المحفوظة", key: "saved", icon: <Bookmark size={20} /> },
     { label: "طلباتي", key: "applications", icon: <FileText size={20} /> },
     { label: "الرسائل", key: "messages", icon: <MessageCircle size={20} /> },
     { label: "المقابلات", key: "interviews", icon: <Calendar size={20} /> },
@@ -115,6 +117,8 @@ export default function Dashboard() {
         return <CompanyMembers />;
       case "programs":
         return <ProgramsPage />;
+      case "saved":
+        return <SavedJobsPage />;
       default:
         return isStudent ? <StudentDashboard me={me} /> : <CompanyDashboard me={me} />;
     }

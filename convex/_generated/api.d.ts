@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as account from "../account.js";
 import type * as admin from "../admin.js";
 import type * as ai from "../ai.js";
 import type * as aiAgent from "../aiAgent.js";
@@ -25,6 +26,7 @@ import type * as messages from "../messages.js";
 import type * as notifications from "../notifications.js";
 import type * as offers from "../offers.js";
 import type * as programs from "../programs.js";
+import type * as savedJobs from "../savedJobs.js";
 import type * as search from "../search.js";
 import type * as seed from "../seed.js";
 import type * as sessionHelpers from "../sessionHelpers.js";
@@ -40,6 +42,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  account: typeof account;
   admin: typeof admin;
   ai: typeof ai;
   aiAgent: typeof aiAgent;
@@ -57,6 +60,7 @@ declare const fullApi: ApiFromModules<{
   notifications: typeof notifications;
   offers: typeof offers;
   programs: typeof programs;
+  savedJobs: typeof savedJobs;
   search: typeof search;
   seed: typeof seed;
   sessionHelpers: typeof sessionHelpers;

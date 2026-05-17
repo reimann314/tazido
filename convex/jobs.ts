@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { internal } from "./_generated/api";
@@ -104,6 +105,24 @@ export const create = mutation({
     return { jobId, status, message: profileComplete
       ? "تم نشر الفرصة بنجاح!"
       : "تم إرسال الفرصة للمراجعة. سيتم نشرها بعد موافقة الإدارة." };
+  },
+});
+
+export const update = mutation({
+  args: {
+    token: v.string(),
+    jobId: v.id("jobs"),
+    title: v.string(),
+    description: v.string(),
+    location: v.string(),
+    type: jobTypeValidator,
+  },
+  handler: async (ctx, { token, jobId, title, description, location, type }) => {
+    const user = await requireRole(ctx, token, "company");
+    const companyId = getEffectiveCompanyId(user);
+    const job = await ctx.db.get(jobId);
+    if (!job || job.companyId !== companyId) throw new Error("غير مصرّح");
+    await ctx.db.patch(jobId, { title: title.trim(), description: description.trim(), location: location.trim(), type });
   },
 });
 
