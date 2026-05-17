@@ -43,6 +43,7 @@ export const searchStudents = query({
       results = results.filter(
         (s) =>
           (s.name && s.name.toLowerCase().includes(q)) ||
+          (s.email && s.email.toLowerCase().includes(q)) ||
           (s.specialization && s.specialization.toLowerCase().includes(q)) ||
           (s.skills && s.skills.toLowerCase().includes(q)) ||
           (s.university && s.university.toLowerCase().includes(q)),

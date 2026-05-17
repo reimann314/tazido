@@ -96,10 +96,11 @@ const TOOLS = [
     type: "function",
     function: {
       name: "searchStudents",
-      description: "البحث عن طلاب حسب التخصص والمهارات والجامعة. للشركات فقط.",
+      description: "البحث عن طلاب بالاسم أو البريد الإلكتروني أو التخصص أو المهارات. للشركات فقط. يمكنك العثور على أي طالب باستخدام اسمه أو بريده الإلكتروني.",
       parameters: {
         type: "object",
         properties: {
+          search: { type: "string", description: "كلمة بحث عامة: اسم الطالب أو بريده الإلكتروني أو تخصصه" },
           specialization: { type: "string", description: "التخصص المطلوب" },
           skills: { type: "string", description: "المهارات المطلوبة" },
           university: { type: "string", description: "الجامعة" },
@@ -214,7 +215,7 @@ function getDescription(name: string, args: any): string {
     case "createOpportunity":
       return `إنشاء فرصة جديدة:\n- العنوان: ${args.title}\n- الموقع: ${args.location}\n- النوع: ${args.type === "internship" ? "تدريب" : args.type === "full-time" ? "دوام كامل" : "دوام جزئي"}`;
     case "searchStudents":
-      return `البحث عن طلاب${args.specialization ? ` في تخصص: ${args.specialization}` : ""}${args.skills ? ` بمهارات: ${args.skills}` : ""}`;
+      return `البحث عن طلاب${args.search ? `: "${args.search}"` : ""}${args.specialization ? ` في تخصص: ${args.specialization}` : ""}${args.skills ? ` بمهارات: ${args.skills}` : ""}`;
     case "sendMessageToStudent": return `إرسال رسالة إلى الطالب`;
     case "addToShortlist": return `إضافة الطالب إلى القائمة المختصرة${args.note ? ` مع ملاحظة: ${args.note}` : ""}`;
     case "applyToJob": return `التقديم على الفرصة: ${args.jobId}`;
@@ -286,7 +287,7 @@ async function executeToolLogic(ctx: any, token: string, me: any, toolName: stri
     }
     case "searchStudents": {
       const students = await ctx.runQuery(api.search.searchStudents, {
-        token, specialization: args.specialization || undefined, skills: args.skills || undefined, university: args.university || undefined,
+        token, search: args.search || undefined, specialization: args.specialization || undefined, skills: args.skills || undefined, university: args.university || undefined,
       });
       if (students.length === 0) return "لم يتم العثور على طلاب مطابقين.";
       return `✅ تم العثور على ${students.length} طالب:\n` +
