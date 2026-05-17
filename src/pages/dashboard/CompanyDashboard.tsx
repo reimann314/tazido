@@ -71,6 +71,7 @@ function JobForm({ token, onDone }: { token: string; onDone: () => void }) {
   const create = useMutation(api.jobs.create);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
@@ -80,15 +81,17 @@ function JobForm({ token, onDone }: { token: string; onDone: () => void }) {
     e.preventDefault();
     setSubmitting(true);
     setError(null);
+    setSuccessMsg(null);
     try {
-      await create({
+      const result = await create({
         token,
         title: title.trim(),
         description: description.trim(),
         location: location.trim(),
         type,
       });
-      onDone();
+      setSuccessMsg(result.message);
+      setTimeout(() => onDone(), 3000);
     } catch (err) {
       const msg = err instanceof Error ? err.message.replace(/^\[.*?\]\s*/, "") : "حدث خطأ";
       setError(msg);
@@ -105,6 +108,13 @@ function JobForm({ token, onDone }: { token: string; onDone: () => void }) {
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">
           {error}
+        </div>
+      )}
+      {successMsg && (
+        <div className={`rounded-xl px-4 py-3 text-sm ${
+          successMsg.includes("للمراجعة") ? "bg-amber-50 border border-amber-200 text-amber-700" : "bg-green-50 border border-green-200 text-green-700"
+        }`}>
+          {successMsg}
         </div>
       )}
       <label className="block">
@@ -164,7 +174,7 @@ type JobRowProps = {
     _id: Id<"jobs">;
     title: string;
     type: JobType;
-    status: "open" | "closed";
+    status: string;
     location: string;
     applicantCount: number;
   };
@@ -182,25 +192,27 @@ function JobRow({ job, token, expanded, onToggle }: JobRowProps) {
         <div className="flex-1 min-w-[200px]">
           <div className="flex items-center gap-2 mb-1">
             <h3 className="font-semibold">{job.title}</h3>
-            <JobStatusBadge status={job.status} />
+            <JobStatusBadge status={job.status as "open" | "closed" | "pending_approval"} />
           </div>
           <p className="text-sm text-text-secondary">
             {JOB_TYPE_LABELS[job.type]} • {job.location} • {job.applicantCount} متقدّم
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            onClick={() =>
-              setStatus({
-                token,
-                jobId: job._id,
-                status: job.status === "open" ? "closed" : "open",
-              })
-            }
-            className="text-sm px-3 py-2 rounded-full border border-border-light hover:border-brand/40"
-          >
-            {job.status === "open" ? "إغلاق" : "إعادة فتح"}
-          </button>
+          {job.status !== "pending_approval" && (
+            <button
+              onClick={() =>
+                setStatus({
+                  token,
+                  jobId: job._id,
+                  status: job.status === "open" ? "closed" : "open",
+                })
+              }
+              className="text-sm px-3 py-2 rounded-full border border-border-light hover:border-brand/40"
+            >
+              {job.status === "open" ? "إغلاق" : "إعادة فتح"}
+            </button>
+          )}
           <button
             onClick={onToggle}
             className="text-sm px-3 py-2 rounded-full bg-brand text-white"

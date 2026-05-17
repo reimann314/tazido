@@ -62,6 +62,10 @@ export const listByCompany = query({
   },
 });
 
+function isProfileComplete(user: any): boolean {
+  return !!(user.companyName && user.commercialRegistration && user.contactNumber && user.activities);
+}
+
 export const create = mutation({
   args: {
     token: v.string(),
@@ -75,20 +79,31 @@ export const create = mutation({
     const companyId = getEffectiveCompanyId(user);
     if (!args.title.trim()) throw new Error("العنوان مطلوب");
     if (!args.description.trim()) throw new Error("الوصف مطلوب");
+
+    // Get full user record to check profile completeness
+    const fullUser = await ctx.db.get(companyId);
+    const profileComplete = fullUser ? isProfileComplete(fullUser) : false;
+
+    const status = profileComplete ? "open" : "pending_approval";
+
     const jobId = await ctx.db.insert("jobs", {
       companyId,
       title: args.title.trim(),
       description: args.description.trim(),
       location: args.location.trim(),
       type: args.type,
-      status: "open",
+      status,
       createdAt: Date.now(),
     });
+
     await ctx.runMutation(internal.stats._updateJobCounter, {
       op: "increment",
-      open: true,
+      open: status === "open",
     });
-    return jobId;
+
+    return { jobId, status, message: profileComplete
+      ? "تم نشر الفرصة بنجاح!"
+      : "تم إرسال الفرصة للمراجعة. سيتم نشرها بعد موافقة الإدارة." };
   },
 });
 
@@ -96,7 +111,7 @@ export const setStatus = mutation({
   args: {
     token: v.string(),
     jobId: v.id("jobs"),
-    status: v.union(v.literal("open"), v.literal("closed")),
+    status: v.union(v.literal("open"), v.literal("closed"), v.literal("pending_approval")),
   },
   handler: async (ctx, { token, jobId, status }) => {
     const user = await requireRole(ctx, token, "company");

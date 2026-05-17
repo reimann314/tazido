@@ -377,8 +377,29 @@ export const deleteUser = mutation({
 
 // ---------- Job Management ----------
 
+export const getPendingJobs = query({
+  args: { adminToken: v.string() },
+  handler: async (ctx, { adminToken }) => {
+    const session = await ctx.db
+      .query("adminSessions")
+      .withIndex("by_token", (q) => q.eq("token", adminToken))
+      .unique();
+    if (!session || session.expiresAt < Date.now()) return null;
+
+    const jobs = await ctx.db.query("jobs").take(200);
+    const pending = jobs.filter((j) => j.status === "pending_approval");
+
+    return await Promise.all(
+      pending.sort((a, b) => b._creationTime - a._creationTime).map(async (job) => {
+        const company = await ctx.db.get(job.companyId);
+        return { ...job, companyName: company?.companyName ?? "—", companyEmail: company?.email ?? "" };
+      }),
+    );
+  },
+});
+
 export const getJobs = query({
-  args: { adminToken: v.string(), status: v.optional(v.union(v.literal("open"), v.literal("closed"))) },
+  args: { adminToken: v.string(), status: v.optional(v.union(v.literal("open"), v.literal("closed"), v.literal("pending_approval"))) },
   handler: async (ctx, { adminToken, status }) => {
     const session = await ctx.db
       .query("adminSessions")
@@ -393,7 +414,7 @@ export const getJobs = query({
 });
 
 export const updateJobStatus = mutation({
-  args: { adminToken: v.string(), jobId: v.id("jobs"), status: v.union(v.literal("open"), v.literal("closed")) },
+  args: { adminToken: v.string(), jobId: v.id("jobs"), status: v.union(v.literal("open"), v.literal("closed"), v.literal("pending_approval")) },
   handler: async (ctx, { adminToken, jobId, status }) => {
     const session = await ctx.db
       .query("adminSessions")

@@ -68,7 +68,7 @@ export default defineSchema({
       v.literal("full-time"),
       v.literal("part-time"),
     ),
-    status: v.union(v.literal("open"), v.literal("closed")),
+    status: v.union(v.literal("open"), v.literal("closed"), v.literal("pending_approval")),
     createdAt: v.number(),
   })
     .index("by_company", ["companyId"])

@@ -1,5 +1,5 @@
 type AppStatus = "pending" | "reviewed" | "accepted" | "rejected";
-type JobStatus = "open" | "closed";
+type JobStatus = "open" | "closed" | "pending_approval";
 
 const APP_LABELS: Record<AppStatus, string> = {
   pending: "قيد المراجعة",
@@ -18,11 +18,13 @@ const APP_COLORS: Record<AppStatus, string> = {
 const JOB_LABELS: Record<JobStatus, string> = {
   open: "مفتوحة",
   closed: "مغلقة",
+  pending_approval: "قيد المراجعة",
 };
 
 const JOB_COLORS: Record<JobStatus, string> = {
   open: "bg-emerald-50 text-emerald-700 border-emerald-200",
   closed: "bg-gray-100 text-gray-600 border-gray-200",
+  pending_approval: "bg-amber-50 text-amber-700 border-amber-200",
 };
 
 export function StatusBadge({ status }: { status: AppStatus }) {
